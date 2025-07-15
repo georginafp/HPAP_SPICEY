@@ -1,0 +1,893 @@
+---
+title: "HPAP T1D SPICEY"
+author: "Georgina Fuentes"
+date: "2025-05-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.algn = "center",
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.width=5, 
+                      fig.height=5)
+
+## packages
+library(GenomicRanges)
+library(dplyr)
+library(ggplot2)
+library(Seurat)
+library(tidyr)
+library(regioneR)
+library(purrr)
+library(Signac)
+library(purrr)
+library(ggside)
+library(viridis)
+library(tibble)
+library(ggsignif)
+library(RColorBrewer)
+library(ggplotify)
+library(pheatmap)
+library(patchwork)
+library(scales)
+library(data.table)
+library(here)
+library(S4Vectors)
+library(ggpubr)
+library(ggridges)
+library(scales) 
+library(tidyverse)
+library(org.Hs.eg.db)
+library(GenomicFeatures)
+
+## spicey data 
+T1D_SPICEY_NEAREST <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_old/test_T1D/data/T1D_SPICEY_NEAREST.rds")
+# hpap <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_old/HPAP_CTRL/data/SUBSET_CTRL_HPAP.rds")
+
+## markers 
+# hkg <- fgsea::gmtPathways("/homes/users/gfuentes/scratch/projects/spicey_old/data/HOUNKPE_HOUSEKEEPING_GENES.v2024.1.Hs.gmt")
+# ubiquitous <- hkg$HOUNKPE_HOUSEKEEPING_GENES
+hkg <- fgsea::gmtPathways("/homes/users/gfuentes/scratch/projects/spicey_old/data/HSIAO_HOUSEKEEPING_GENES.v2024.1.Hs.gmt")
+ubiquitous <- hkg$HSIAO_HOUSEKEEPING_GENES
+
+
+# ct_markers <- read.delim("/homes/users/gfuentes/shared_data/refs/hi_populations_markers.txt",
+#                          stringsAsFactors=F)
+
+url <- "https://docs.google.com/spreadsheets/d/1bdGW69IXu4Iy9Uinnfjd42xDtR6dkCOmX0B-T0qVxrI/edit?gid=0#gid=0"
+
+get_gsheet <- function(url, sheet) {
+  googlesheets4::gs4_deauth()
+  googlesheets4::gs4_auth()
+  gsheet <- googlesheets4::read_sheet(url, sheet)
+  return(gsheet)
+}
+ct_markers <- get_gsheet(url=url, sheet="LP")
+ct_markers <- ct_markers %>%
+  data.frame() %>% 
+  # mutate(CellType = gsub(" cells", "", CellType),
+  #        CellType = gsub("Pancreatic stellate", "Stellate", CellType)) %>%
+  # filter(Specie %in% c("Hs", "Mm Hs")) %>%
+  # dplyr::select(-c(Specie)) %>%
+  dplyr::filter(CellType %in% unique(T1D_SPICEY_NEAREST$cell_type))
+  
+
+
+# ct_markers2 <- data.table::fread("/homes/users/gfuentes/shared_data/refs/Islet_important_Motifs.csv")
+# ct_markers3 <- data.table::fread("/homes/users/gfuentes/shared_data/refs/PANCREATIC_BETA_GENES_HGNC.txt")
+# ct_markers4 <- data.table::fread("/homes/users/gfuentes/shared_data/refs/Pasquali2014_SuppTable2_importantIsletGenes.csv")
+
+# ct_markers <- unique(c(ct_markers$Gene, 
+#                        ct_markers3$Symbol, 
+#                        ct_markers4$Symbol
+#                        ))
+
+
+
+## disease 
+# disease_paths <- list(
+#   T1D = "/homes/users/gfuentes/shared_data/refs/T1D_GWAS_ASSOCIATIONS.tsv",
+#   T2D = "/homes/users/gfuentes/shared_data/refs/T2D_GWAS_ASSOCIATIONS.tsv",
+#   # LUNG_CANCER = "/homes/users/gfuentes/shared_data/refs/LUNG_CANCER_ASSOCIATIONS.tsv",
+#   SCHIZO = "/homes/users/gfuentes/shared_data/refs/SCHIZOFRENIA_ASSOCIATIONS.tsv",
+#   RHEUMATOID = "/homes/users/gfuentes/shared_data/refs/RHEUMATOID_ASSOCIATIONS.tsv",
+#   PSORIASIS = "/homes/users/gfuentes/shared_data/refs/PSORIASIS_ASSOCIATIONS.tsv"
+# )
+
+## palette 
+cell_colors <- c("Alpha" = "#008E80",
+                 "Ductal" = "#5A7A98",
+                 "Beta" = "#D37972",
+                 "Delta" = "#fcbbb6",
+                 "Acinar" = "#B4609B",
+                 "Gamma" = "#C6E6FF",
+                 "Stellate" = "#fbb679",
+                 #"Quiescent-stellate" = "#ffdd6c",
+                 "Unknown" = "#c7c7c7",
+                 "Immune" = "#7E9F66",
+                 "Epsilon" = "#A3D2CA",
+                 "Endothelial" = "#87abbf")
+
+```
+
+```{r run-spicey, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+library(SPICEY)
+library(cicero)
+library(tidyverse)
+
+atac <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_old/test_T1D/data/DA_ATAC_HPAP-T1D.rds")
+rna <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_old/test_T1D/data/DA_RNA_HPAP-T1D.rds")
+rna <- lapply(rna, function(df) {
+  rownames_to_column(df, var = "gene_id")
+})
+
+# links <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_old/test_T1D/data/T1D_LINKS.rds") %>%
+#   dplyr::filter(coaccess > 0.5)
+
+T1D_SPICEY_NEAREST <- run_spicey(
+  atac = atac,
+  rna = rna,
+  gene_id = "gene_id",
+  annot_method = "nearest",
+  links = links,
+  txdb = TxDb.Hsapiens.UCSC.hg38.knownGene::TxDb.Hsapiens.UCSC.hg38.knownGene, 
+  annot_dbi = org.Hs.eg.db::org.Hs.eg.db,
+  # coaccess_cutoff_override = 0.25,
+  link_spicey_measures = TRUE, 
+  # filter_promoter_distal = TRUE,
+  filter_protein_coding = TRUE,
+  keep_mito = FALSE,
+  add_tss_annotation = TRUE,
+  verbose = TRUE
+)
+
+saveRDS(T1D_SPICEY_NEAREST, "/homes/users/gfuentes/scratch/projects/spicey_old/test_T1D/data/T1D_SPICEY_NEAREST.rds")
+```
+
+```{r umap fig.show='hold', out.width='5%', message=FALSE, warning=FALSE, fig.width=5, fig.height=5}
+
+knitr::include_graphics("/homes/users/gfuentes/scratch/projects/spicey_old/HPAP_CTRL/figs/HPAP_CTRL_UMAP.png")
+
+```
+
+# Distribution of SPICEY measures
+
+```{r distrib-spicey, message=FALSE, warning=FALSE, fig.width=6, fig.height=6}
+
+# Prepare long data for SPICEY metrics
+spicey_long <- T1D_SPICEY_NEAREST %>%
+  as.data.frame() %>%
+  group_by(gene_nearest) %>%
+  # filter(!(all(RETSI == 0 | is.na(RETSI)) & all(GETSI == 0 | is.na(GETSI)))) %>%
+  ungroup() %>%
+  pivot_longer(cols = c(RETSI, GETSI), names_to = "metric", values_to = "value") %>%
+  filter(!is.na(value))
+
+
+# Compute combined mean (RETSI + GETSI) for ordering
+cell_order <- spicey_long %>%
+  group_by(cell_type) %>%
+  summarise(mean_value = mean(value, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(mean_value)) %>%
+  pull(cell_type)
+
+# Reorder factor levels
+spicey_long <- spicey_long %>%
+  mutate(cell_type = factor(cell_type, levels = cell_order))
+
+# Combine and summarize
+.markers <- bind_rows(
+  T1D_SPICEY_NEAREST %>%
+  data.frame() %>%
+  inner_join(ct_markers %>% dplyr::select(-Source),
+             by = c("gene_nearest" = "Gene", "cell_type" = "CellType")) %>%
+  mutate(type = "Tissue-specific"), 
+  
+  T1D_SPICEY_NEAREST %>%
+  data.frame() %>%
+  filter(gene_nearest %in% ubiquitous) %>%
+  mutate(type = "Ubiquitous")
+  ) %>%
+  mutate(
+    type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
+    RETSI = as.numeric(RETSI),
+    GETSI = as.numeric(GETSI)
+  ) %>%
+  filter(!is.na(RETSI), !is.na(GETSI)) %>%
+  group_by(cell_type, type) %>%
+  summarise(
+    RETSI = mean(RETSI, na.rm = TRUE),
+    GETSI = mean(GETSI, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+
+
+
+# Count number of cells per cell type (based on hpap annotation)
+# cell_counts <- hpap@meta.data %>%
+#   data.frame() %>%
+#   count(cell_type = RNA_scSorter.Pred_Type.predicted.id) %>%
+#   dplyr::filter(cell_type %in% cell_order) %>%
+#   mutate(cell_type = factor(cell_type, levels = cell_order))
+
+# Plot 1: Boxplot + jitter + marker dots
+distribution <- ggplot(spicey_long, aes(x = cell_type, y = value)) +
+  geom_jitter(color = "grey80", width = 0.15, size = 0.4, alpha = 0.05) +
+  geom_boxplot(aes(fill = cell_type), position = position_dodge(width = 0.8),
+               outlier.shape = NA, linewidth = 0.6, color = "gray45") +
+  geom_point(
+    data = .markers %>%
+      pivot_longer(cols = c(RETSI, GETSI), names_to = "metric", values_to = "value"),
+    aes(x = cell_type, y = value, color = type),
+    size = 2
+  ) +
+  scale_color_manual(values = c(
+  "Tissue-specific" = "#965819",
+  "Ubiquitous" = "#585800"
+)) +
+  facet_grid(~metric) +
+  scale_fill_manual(values = cell_colors) +
+  labs(x = "Cell type", y = "SPICEY measure") +
+  coord_flip() +
+  theme_gray(base_size = 14) +
+  theme(
+    legend.position = "none",
+    panel.grid.minor = element_blank(),
+    axis.title = element_text(size = 10, margin = margin(t = 5)),
+    axis.text = element_text(size = 8, margin = margin(t = 2)),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(size = 8),
+    plot.title = element_text(size = 12),
+    plot.margin = margin(5, 2, 5, 5)
+  )
+
+# Plot 2: Barplot of cell counts
+# barplot_counts <- ggplot(cell_counts, aes(x = cell_type, y = n, fill = cell_type)) +
+#   geom_col(width = 0.6) +
+#   scale_fill_manual(values = cell_colors) +
+#   coord_flip() +
+#   labs(x = NULL, y = "# cells") +
+#   theme_gray(base_size = 14) +
+#   theme(
+#     axis.text.y = element_blank(),  # ← hides y labels
+#     axis.ticks.y = element_blank(),
+#     axis.title.x = element_text(size = 10),
+#     legend.position = "none",
+#     panel.grid.minor = element_blank(),
+#     axis.title = element_text(size = 10, margin = margin(t = 5)),
+#     axis.text = element_text(size = 8, margin = margin(t = 2)),
+#     axis.text.x = element_text(angle = 45, hjust = 1),
+#     strip.text = element_text(size = 8),
+#     plot.title = element_text(size = 12),
+#     plot.margin = margin(5, 5, 5, 2)  # top, right, bottom, left
+#   )
+
+# # Combine plots side by side
+# distribution_counts <- distribution + barplot_counts +
+#   plot_layout(ncol = 2, widths = c(2, 0.5))
+
+# distribution
+
+distribution <- cowplot::plot_grid(distribution,                                  
+                                   labels = c("A"), 
+                                   label_size = 12)
+distribution
+
+```
+
+# Distribution markers
+
+```{r markers-tss, message=FALSE, warning=FALSE}
+
+prom <- bind_rows(
+  # Tissue-specific: match by gene and cell type, keep all rows
+  T1D_SPICEY_NEAREST %>%
+    data.frame() %>%
+    filter(in_TSS == TRUE) %>%
+    inner_join(ct_markers %>% dplyr::select(-Source),
+               by = c("TSS_gene" = "Gene", "cell_type" = "CellType")) %>%
+    mutate(type = "Tissue-specific") %>%
+    filter(gene_nearest %in% ct_markers$Gene),
+  
+  # Ubiquitous: just filter by gene list
+  T1D_SPICEY_NEAREST %>%
+    data.frame() %>%
+    filter(gene_nearest %in% ubiquitous
+           ) %>%
+    mutate(type = "Ubiquitous")) %>%
+  
+  # Factor level for consistency in plotting
+  mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
+         RETSI = as.numeric(RETSI),
+         GETSI = as.numeric(GETSI)) %>%
+  filter(!is.na(RETSI), !is.na(GETSI), !is.na(type)) %>%
+  mutate(region = paste0(seqnames, ":", start, "-", end)) %>%
+  # filter(annotation == "Promoter") %>%
+  pivot_longer(cols = c(RETSI, GETSI),
+               names_to = "spicey_measure",
+               values_to = "value") %>%
+  filter(annotation == "Promoter") %>%
+  # filter(
+  #   (type == "Ubiquitous" & (RETSI_entropy > 0.5 | GETSI_entropy > 0.5)) |
+  #   (type == "Tissue-specific" & (RETSI_entropy < 0.25 | GETSI_entropy < 0.25))
+  # ) %>%
+  mutate(
+    color_key = paste(type, spicey_measure, sep = "_")
+  ) %>%
+  ggplot(aes(x = value, color = color_key, fill = color_key)) +
+  geom_density(alpha = 0.6) +
+  ggside::geom_xsideboxplot(aes(y = spicey_measure, fill = color_key), 
+                            orientation = "y", outlier.size = 0.1, 
+                            outlier.alpha = 0.5) +
+  ggside::scale_xsidey_discrete() +
+  scale_y_continuous(name = "Density") +
+  scale_color_manual(values = c(
+    "Ubiquitous_RETSI" = "#656d4a",
+    "Ubiquitous_GETSI" = "#5e614b",
+    "Tissue-specific_RETSI" = "#b37a56",
+    "Tissue-specific_GETSI" = "#8c5e3c"
+  )) +
+  scale_fill_manual(values = c(
+    "Ubiquitous_RETSI" = "#a4ac86",
+    "Ubiquitous_GETSI" = "#919b74",
+    "Tissue-specific_RETSI" = "#D2B48C",
+    "Tissue-specific_GETSI" = "#c8a77b"
+  )) +
+  
+  labs(x = "SPICEY measure") +
+  # ggtitle("Promoter regions") +
+  theme_gray() +
+  theme(
+    legend.position = "none",
+    ggside.panel.scale.x = 0.3,
+    axis.title = element_text(size = 10, margin = margin(t = 5)),  # smaller top margin
+    axis.text = element_text(size = 8, margin = margin(t = 2)),   # bring x-ticks closer
+    strip.text = element_text(size = 8),
+    axis.text.x = element_text(angle=30),
+    plot.title = element_text(size = 12)) +
+  facet_grid(~ type) +
+  ggtitle("Promoter")
+
+
+
+enh <- bind_rows(
+  # Tissue-specific: match by gene and cell type, keep all rows
+  T1D_SPICEY_NEAREST %>%
+    data.frame() %>%
+    # filter(direct_TSS == TRUE) %>%
+    inner_join(ct_markers %>% dplyr::select(-Source),
+               by = c("gene_nearest" = "Gene", "cell_type" = "CellType")) %>%
+    mutate(type = "Tissue-specific") %>%
+    filter(gene_nearest %in% ct_markers$Gene),
+  
+  # Ubiquitous: just filter by gene list
+  T1D_SPICEY_NEAREST %>%
+    data.frame() %>%
+    filter(gene_nearest %in% ubiquitous) %>%
+    mutate(type = "Ubiquitous")) %>%
+  
+  # Factor level for consistency in plotting
+  mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
+         RETSI = as.numeric(RETSI),
+         GETSI = as.numeric(GETSI)) %>%
+  filter(!is.na(RETSI), !is.na(GETSI), !is.na(type)) %>%
+  mutate(region = paste0(seqnames, ":", start, "-", end)) %>%
+  pivot_longer(cols = c(RETSI, GETSI),
+               names_to = "spicey_measure",
+               values_to = "value") %>% 
+  filter(annotation == "Distal") %>%
+  mutate(
+    color_key = paste(type, spicey_measure, sep = "_")
+  ) %>%
+  ggplot(aes(x = value, color = color_key, fill = color_key)) +
+  geom_density(alpha = 0.6) +
+  ggside::geom_xsideboxplot(aes(y = spicey_measure, fill = color_key), 
+                            orientation = "y", outlier.size = 0.1, 
+                            outlier.alpha = 0.5) +
+  ggside::scale_xsidey_discrete() +
+  scale_y_continuous(name = "Density") +
+  scale_color_manual(values = c(
+    "Ubiquitous_RETSI" = "#656d4a",
+    "Ubiquitous_GETSI" = "#5e614b",
+    "Tissue-specific_RETSI" = "#b37a56",
+    "Tissue-specific_GETSI" = "#8c5e3c"
+  )) +
+  scale_fill_manual(values = c(
+    "Ubiquitous_RETSI" = "#a4ac86",
+    "Ubiquitous_GETSI" = "#919b74",
+    "Tissue-specific_RETSI" = "#D2B48C",
+    "Tissue-specific_GETSI" = "#c8a77b"
+  )) +
+  
+  labs(x = "SPICEY measure") +
+  # ggtitle("Promoter regions") +
+  theme_gray() +
+  theme(
+    legend.position = "none",
+    ggside.panel.scale.x = 0.3,
+    axis.title = element_text(size = 10, margin = margin(t = 5)),  # smaller top margin
+    axis.text = element_text(size = 8, margin = margin(t = 2)),   # bring x-ticks closer
+    strip.text = element_text(size = 8),
+    axis.text.x = element_text(angle=30),
+    plot.title = element_text(size = 12)
+  ) +
+  facet_grid(~ type) +
+  ggtitle("Distal")
+
+
+final <- cowplot::plot_grid(prom, enh,                                  
+                            labels = c("B", "C"), 
+                            label_size = 12)
+final 
+```
+
+# Entropy 
+
+```{r entropy, message=FALSE, warning=FALSE}
+
+# prom -------------------------------------------------------------------------
+entropy <- bind_rows(
+  # Tissue-specific data
+  T1D_SPICEY_NEAREST %>%
+    data.frame() %>%
+    dplyr::filter(gene_nearest %in% ct_markers$Gene) %>%
+    mutate(type = "Tissue-specific"),
+  
+  # Ubiquitous data
+  T1D_SPICEY_NEAREST %>%
+    data.frame() %>%
+    dplyr::filter(gene_nearest %in% ubiquitous) %>%
+    mutate(type = "Ubiquitous")) %>%
+  mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
+         RETSI = as.numeric(RETSI),
+         GETSI = as.numeric(GETSI)) %>%
+  filter(
+    !is.na(RETSI),
+    !is.na(GETSI),
+    !is.na(type)) %>%
+  {rownames(.) <- NULL; .} %>%
+  filter(!is.na(GETSI),
+         !is.na(RETSI)) %>%
+  pivot_longer(cols = c(RETSI_entropy, GETSI_entropy),
+               names_to = "spicey_measure",
+               values_to = "value") %>%
+  mutate(spicey_measure = gsub("_entropy", "", spicey_measure)) %>%
+  dplyr::filter(annotation == "Promoter") %>%
+  ggplot(aes(x = type,
+             y = value,
+             fill = type)) +
+  geom_violin() +
+  geom_boxplot(alpha = 0.4) +  # Adjust outlier behavior if needed
+  theme_gray() +
+  labs(x = "", y = "Entropy") +
+  theme(
+    legend.position = "none",
+    ggside.panel.scale.x = 0.3,
+    axis.title = element_text(size = 10, margin = margin(t = 5)),
+    axis.text = element_text(size = 8, margin = margin(t = 2)),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(size = 8),
+    plot.title = element_text(size = 12)
+  ) +
+  scale_fill_manual(values = c(
+    "Ubiquitous" = "#919b74",
+    "Tissue-specific" = "#c8a77b"
+  )) +
+  # ylim(c(1,1.2))+
+  geom_signif(comparisons = list(
+    c("Tissue-specific", "Ubiquitous")),
+    y_position = c(1, 1.1),  # Adjust y position for annotations
+    map_signif_level = TRUE,  # Display significance level
+    textsize = 2.3,
+    vjust = 0.01,               # Moves text slightly above the line
+    tip_length = 0.02         # Negative value to flip arrows **upwards**
+  ) +
+  facet_grid(~spicey_measure) 
+
+entropy
+
+# all -------------------------------------------------------------------------
+entropy_prom <- bind_rows(
+  # Tissue-specific data
+  T1D_SPICEY_NEAREST %>%
+    data.frame() %>%
+    dplyr::filter(gene_nearest %in% ct_markers$Gene) %>%
+    mutate(type = "Tissue-specific"),
+  
+  # Ubiquitous data
+  T1D_SPICEY_NEAREST %>%
+    data.frame() %>%
+    dplyr::filter(gene_nearest %in% ubiquitous) %>%
+    mutate(type = "Ubiquitous")) %>%
+  mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
+         RETSI = as.numeric(RETSI),
+         GETSI = as.numeric(GETSI)) %>%
+  filter(
+    !is.na(RETSI),
+    !is.na(GETSI),
+    !is.na(type)) %>%
+  {rownames(.) <- NULL; .} %>%
+  filter(!is.na(GETSI),
+         !is.na(RETSI)) %>%
+  pivot_longer(cols = c(RETSI_entropy, GETSI_entropy),
+               names_to = "spicey_measure",
+               values_to = "value") %>%
+  mutate(spicey_measure = gsub("_entropy", "", spicey_measure)) %>%
+  dplyr::filter(annotation == "Promoter") %>%
+  ggplot(aes(x = type,
+             y = value,
+             fill = type)) +
+  geom_violin() +
+  geom_boxplot(alpha = 0.4) +  # Adjust outlier behavior if needed
+  theme_gray() +
+  labs(x = "", y = "Entropy") +
+  theme(
+    legend.position = "none",
+    ggside.panel.scale.x = 0.3,
+    axis.title = element_text(size = 10, margin = margin(t = 5)),
+    axis.text = element_text(size = 8, margin = margin(t = 2)),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(size = 8),
+    plot.title = element_text(size = 12)
+  ) +
+  scale_fill_manual(values = c(
+    "Ubiquitous" = "#919b74",
+    "Tissue-specific" = "#c8a77b"
+  )) +
+  # ylim(c(1,1.2))+
+  geom_signif(comparisons = list(
+    c("Tissue-specific", "Ubiquitous")),
+    y_position = c(1, 1.1),  # Adjust y position for annotations
+    map_signif_level = TRUE,  # Display significance level
+    textsize = 2.3,
+    vjust = 0.01,               # Moves text slightly above the line
+    tip_length = 0.02         # Negative value to flip arrows **upwards**
+  ) +
+  facet_grid(~spicey_measure) +
+  ggtitle("Promoter")
+
+
+entropy_distal <- bind_rows(
+  # Tissue-specific data
+  T1D_SPICEY_NEAREST %>%
+    data.frame() %>%
+    dplyr::filter(gene_nearest %in% ct_markers$Gene) %>%
+    mutate(type = "Tissue-specific"),
+  
+  # Ubiquitous data
+  T1D_SPICEY_NEAREST %>%
+    data.frame() %>%
+    dplyr::filter(gene_nearest %in% ubiquitous) %>%
+    mutate(type = "Ubiquitous")) %>%
+  mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
+         RETSI = as.numeric(RETSI),
+         GETSI = as.numeric(GETSI)) %>%
+  filter(
+    !is.na(RETSI),
+    !is.na(GETSI),
+    !is.na(type)) %>%
+  {rownames(.) <- NULL; .} %>%
+  filter(!is.na(GETSI),
+         !is.na(RETSI)) %>%
+  pivot_longer(cols = c(RETSI_entropy, GETSI_entropy),
+               names_to = "spicey_measure",
+               values_to = "value") %>%
+  mutate(spicey_measure = gsub("_entropy", "", spicey_measure)) %>%
+  dplyr::filter(annotation == "Distal") %>%
+  ggplot(aes(x = type,
+             y = value,
+             fill = type)) +
+  geom_violin() +
+  geom_boxplot(alpha = 0.4) +  # Adjust outlier behavior if needed
+  theme_gray() +
+  labs(x = "", y = "Entropy") +
+  theme(
+    legend.position = "none",
+    ggside.panel.scale.x = 0.3,
+    axis.title = element_text(size = 10, margin = margin(t = 5)),
+    axis.text = element_text(size = 8, margin = margin(t = 2)),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(size = 8),
+    plot.title = element_text(size = 12)
+  ) +
+  scale_fill_manual(values = c(
+    "Ubiquitous" = "#919b74",
+    "Tissue-specific" = "#c8a77b"
+  )) +
+  # ylim(c(1,1.2))+
+  geom_signif(comparisons = list(
+    c("Tissue-specific", "Ubiquitous")),
+    y_position = c(1, 1.1),  # Adjust y position for annotations
+    map_signif_level = TRUE,  # Display significance level
+    textsize = 2.3,
+    vjust = 0.01,               # Moves text slightly above the line
+    tip_length = 0.02         # Negative value to flip arrows **upwards**
+  ) +
+  facet_grid(~spicey_measure) +
+  ggtitle("Distal")
+
+
+final_ENT <- cowplot::plot_grid(entropy_prom, entropy_distal,                                  
+                                labels = c("A", "B"), 
+                                label_size = 12)
+final_ENT
+```
+# Main figure
+
+```{r final-figure, message=FALSE, warning=FALSE}
+
+## Combine plots
+# bottom_row <- cowplot::plot_grid(prom, enh,
+#                                  labels = c("B", "C"),
+#                                  label_size = 12,
+#                                  ncol = 2)
+
+# Now combine the top plot (distribution) with the bottom row
+final_plot <- cowplot::plot_grid(distribution, final,
+                                 final_ENT,
+                                 # labels = c("A", "B"),  # "A" label for the top, no label for the combined bottom row
+                                 label_size = 12,
+                                 nrow = 3,
+                                 rel_heights = c(1, 1, 1))  # adjust as needed
+final_plot
+
+```
+
+# Heatmap 
+
+```{r spicey-combined-heatmap, message=FALSE, warning=FALSE}
+
+# Step 1: Aggregate RETSI & GETSI at gene + cell_type level
+agg_df <- T1D_SPICEY_NEAREST %>%
+  data.frame() %>%
+  # filter(annotation == "Promoter", 
+  #        in_TSS == TRUE) %>%
+  filter(!is.na(RETSI), 
+         !is.na(GETSI), 
+         !is.na(gene_nearest)) %>%
+  group_by(gene_nearest, cell_type) %>%
+  summarise(
+    RETSI = mean(RETSI, na.rm = TRUE),
+    GETSI = mean(GETSI, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  ungroup() %>%
+  group_by(gene_nearest) %>%
+  mutate(GETSI_z = scale(GETSI)[,1], 
+         RETSI_z = scale(RETSI)[,1]) %>%
+  ungroup()
+  
+
+z_heatmap <- function(combined_mean) {
+
+  # Step 2: Select top genes per cell type based on combined_mean
+  selected_genes <- agg_df %>%
+    group_by(cell_type) %>%
+    slice_max(order_by = combined_mean, n = 5, with_ties = FALSE) %>%
+    pull(gene_nearest) %>%
+    unique()
+  
+  # Step 3: Filter aggregated df to selected genes only
+  filtered_df <- agg_df %>%
+    filter(gene_nearest %in% selected_genes)
+  
+  # Step 4: Pivot to wide matrix for sorting
+  wide_mat <- filtered_df %>%
+    dplyr::select(gene_nearest, cell_type, combined_mean) %>%
+    pivot_wider(names_from = cell_type, values_from = combined_mean) %>%
+    column_to_rownames("gene_nearest") %>%
+    as.matrix()
+  
+  wide_mat[is.na(wide_mat)] <- 0
+  celltypes <- colnames(wide_mat)
+  
+  # Step 5: For each gene find cell type of max combined_mean
+  max_ct_per_gene <- apply(wide_mat, 1, function(x) celltypes[which.max(x)])
+  
+  # Step 6: Order genes so their max cell types follow cell type order (start with current order)
+  # This groups genes by their max cell type
+  gene_order_df <- data.frame(
+    gene = rownames(wide_mat),
+    max_cell_type = max_ct_per_gene,
+    stringsAsFactors = FALSE
+  ) %>%
+    arrange(factor(max_cell_type, levels = celltypes))
+  
+  ordered_genes <- gene_order_df$gene
+  
+  # Step 7: Order cell types by the first occurrence of their genes in the ordered genes list
+  # This reorders cell types so they align with gene grouping
+  celltype_order_df <- gene_order_df %>%
+    group_by(max_cell_type) %>%
+    summarise(first_gene_pos = min(match(gene, ordered_genes))) %>%
+    arrange(first_gene_pos)
+  
+  ordered_celltypes <- celltype_order_df$max_cell_type
+  
+  # Step 8: Set factors in filtered_df to ordered levels for plotting
+  plot_df <- filtered_df %>%
+    mutate(
+      gene_nearest = factor(gene_nearest, levels = ordered_genes),
+      cell_type = factor(cell_type, levels = ordered_celltypes)
+    )
+  
+  # Step 9: Plot heatmap
+  gene_colors <- ifelse(levels(plot_df$gene_nearest) %in% ct_markers$Gene, "#965819", "grey30")
+  
+  # Plot heatmap with colored row text
+  custom_colors <- c(
+    "white",
+    # "#F8E3E0", 
+    "#E18C80", #"#CA6D5F", 
+    "#B86357", #"#84473E", 
+    "#723D36", #"#60342D", 
+    "#4F2A25" #"#3D211D"
+  )
+  
+  spicey_heatmap <- ggplot(plot_df, aes(x = cell_type, y = gene_nearest, fill = combined_mean)) +
+    geom_tile(color = "grey80", width = 0.95) +  # width closer to 1 to fill gaps
+    scale_x_discrete(expand = c(0, 0)) +        # remove padding on x-axis
+    scale_y_discrete(expand = c(0, 0)) +        # remove padding on y-axis
+    coord_fixed(ratio = 0.5) +                   # fix aspect ratio to reduce horizontal space (try 0.5, tweak as needed)
+    scale_fill_gradientn(
+      colours = custom_colors,
+      # limits = c(0, 1),
+      name = paste0(combined_mean, "\nSPICEY"),
+      na.value = "grey90") +
+    theme_gray() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1, size = 12),
+      axis.text.y = element_text(size = 12, color = gene_colors),
+      panel.grid = element_blank(),
+      ggside.panel.scale.x = 0.3,
+      axis.title = element_text(size = 10, margin = margin(t = 5)),
+      axis.text = element_text(size = 8, margin = margin(t = 2)),
+      strip.text = element_text(size = 8),
+      plot.title = element_text(size = 12)) +
+    labs(
+      x = "Cell Type",
+      y = "Gene")
+  return(spicey_heatmap)
+  
+}
+
+z_heatmap("GETSI_z")
+
+
+ggsave(paste0(here::here("/homes/users/gfuentes/scratch/projects/spicey_old/HPAP_CTRL/figs"), "/SPICEY_heatmap.png"),
+       plot = spicey_heatmap, width = 8.5, height = 6.5, units = "in", dpi = 300)
+
+```
+
+```{r}
+
+# Step 1: Aggregate RETSI & GETSI at gene + cell_type level
+agg_df <- T1D_SPICEY_NEAREST %>%
+  data.frame() %>%
+  filter(!is.na(RETSI), 
+         !is.na(GETSI), 
+         !is.na(gene_nearest)) %>%
+  # group_by(gene_nearest, cell_type) %>%
+  # summarise(
+  #   RETSI = mean(RETSI, na.rm = TRUE),
+  #   GETSI = mean(GETSI, na.rm = TRUE),
+  #   .groups = "drop"
+  # ) %>%
+  # ungroup() %>%
+  group_by(gene_nearest,) %>%
+  mutate(GETSI_z = scale(GETSI)[,1], 
+         RETSI_z = scale(RETSI)[,1] #, 
+         #combined_mean  = GETSI_z
+         ) %>%
+  ungroup()
+  
+
+z_heatmap <- function(z_value) {
+  z_col <- enquo(z_value)  # capture the column name
+  
+  # Step 2: Select top genes per cell type based on z_value column
+  selected_genes <- agg_df %>%
+    group_by(cell_type) %>%
+    slice_max(order_by = !!z_col, n = 5, with_ties = FALSE) %>%
+    pull(gene_nearest) %>%
+    unique()
+  
+  # Step 3: Filter aggregated df to selected genes only
+  filtered_df <- agg_df %>%
+    filter(gene_nearest %in% selected_genes)
+  
+  # Step 4: Pivot to wide matrix for sorting
+  wide_mat <- filtered_df %>%
+    dplyr::select(gene_nearest, cell_type, !!z_col) %>%
+    pivot_wider(names_from = cell_type, values_from = !!z_col) %>%
+    column_to_rownames("gene_nearest") %>%
+    as.matrix()
+  
+  wide_mat[is.na(wide_mat)] <- 0
+  
+  celltypes <- colnames(wide_mat)
+  
+  # Step 5: For each gene find cell type of max z_value
+  max_ct_per_gene <- apply(wide_mat, 1, function(x) celltypes[which.max(x)])
+  
+  # Step 6: Order genes so their max cell types follow cell type order
+  gene_order_df <- data.frame(
+    gene = rownames(wide_mat),
+    max_cell_type = max_ct_per_gene,
+    stringsAsFactors = FALSE
+  ) %>%
+    arrange(factor(max_cell_type, levels = celltypes))
+  
+  ordered_genes <- gene_order_df$gene
+  
+  # Step 7: Order cell types by the first occurrence of their genes
+  celltype_order_df <- gene_order_df %>%
+    group_by(max_cell_type) %>%
+    summarise(first_gene_pos = min(match(gene, ordered_genes))) %>%
+    arrange(first_gene_pos)
+  
+  ordered_celltypes <- celltype_order_df$max_cell_type
+  
+  # Step 8: Set factors for plotting
+  plot_df <- filtered_df %>%
+    mutate(
+      gene_nearest = factor(gene_nearest, levels = ordered_genes),
+      cell_type = factor(cell_type, levels = ordered_celltypes)
+    )
+  
+  # Step 9: Plot heatmap
+  gene_colors <- ifelse(levels(plot_df$gene_nearest) %in% ct_markers$Gene, "#965819", "grey30")
+  
+  custom_colors <- c(
+    "white",
+    "#E18C80",
+    "#B86357",
+    "#723D36",
+    "#4F2A25"
+  )
+  
+  z_plot <- ggplot(plot_df, aes(x = cell_type, y = gene_nearest, fill = !!z_col)) +
+    geom_tile(color = "grey80", width = 0.95) +
+    scale_x_discrete(expand = c(0, 0)) +
+    scale_y_discrete(expand = c(0, 0)) +
+    coord_fixed(ratio = 0.5) +
+    scale_fill_gradientn(
+      colours = custom_colors,
+      na.value = "grey90",
+      name = paste0(gsub("_z", "", quo_name(z_col)), 
+                    "\nZ-score")
+    ) +
+    theme_gray() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1, size = 12),
+      axis.text.y = element_text(size = 12, color = gene_colors),
+      panel.grid = element_blank(),
+      axis.title = element_text(size = 10, margin = margin(t = 5)),
+      axis.text = element_text(size = 8, margin = margin(t = 2)),
+      strip.text = element_text(size = 8),
+      plot.title = element_text(size = 12)
+    ) +
+    labs(x = "Cell Type", y = "Gene")
+  
+  return(z_plot)
+}
+
+
+getsi_hm <- z_heatmap(GETSI_z)
+retsi_hm <- z_heatmap(RETSI_z)
+
+heatmaps <- cowplot::plot_grid(getsi_hm, 
+                               retsi_hm,
+                               labels = c("A", "B"),  # "A" label for the top, no label for the combined bottom row
+                               label_size = 12,
+                               nrow = 1)  # adjust as needed
+
+ggsave(paste0(here::here("/homes/users/gfuentes/scratch/projects/spicey_old/HPAP_CTRL/figs"), "/SPICEY_HEATMAPS.png"),
+       plot = heatmaps, width = 8, height = 9, units = "in", dpi = 300)
+
+```
+

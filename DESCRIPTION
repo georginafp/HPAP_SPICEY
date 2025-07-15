@@ -1,0 +1,45 @@
+Package: spicey
+Type: Package
+Title: Specificity Index for Coding and Epigenetic activitY
+Version: 0.0.1
+Authors@R: 
+    person("Fuentes-Páez", "Georgina", email = "georgina.fuentes@upf.edu", role = c("aut", "cre"))
+Description: Calculates tissue specificity scores for genes (GETSI) and regulatory regions (RETSI) across tissues or cell types using gene expression and epigenetic signals. A unified framework to characterize specificity landscapes.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Depends: R (>= 4.1.0)
+Imports:
+    GenomicRanges,
+    dplyr,
+    ggplot2,
+    Seurat,
+    tidyr,
+    regioneR,
+    purrr,
+    Signac,
+    ggside,
+    viridis,
+    tibble,
+    ggsignif,
+    RColorBrewer,
+    ggplotify,
+    pheatmap,
+    patchwork,
+    scales,
+    data.table,
+    here,
+    InteractionSet,
+    stringr,
+    ChIPseeker,
+    TxDb.Hsapiens.UCSC.hg38.knownGene,
+    org.Hs.eg.db,
+    plyranges,
+    AnnotationDbi
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr

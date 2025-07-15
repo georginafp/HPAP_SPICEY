@@ -1,0 +1,810 @@
+---
+title: 'Paper: SPICEY R Package'
+author: "Georgina Fuentes"
+date: "2025-05-16"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.algn = "center",
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.width=5, 
+                      fig.height=5)
+
+## packages
+library(GenomicRanges)
+library(dplyr)
+library(ggplot2)
+library(Seurat)
+library(tidyr)
+library(regioneR)
+library(purrr)
+library(Signac)
+library(purrr)
+library(ggside)
+library(viridis)
+library(tibble)
+library(ggsignif)
+library(RColorBrewer)
+library(ggplotify)
+library(pheatmap)
+library(patchwork)
+library(scales)
+library(data.table)
+library(here)
+library(S4Vectors)
+library(ggpubr)
+
+## spicey data 
+spicey_ctrl <- readRDS("/homes/users/gfuentes/scratch/projects/spicey/HPAP_CTRL/data/CTRL_SPICEY_ANNOTATED_COACC.rds")
+
+
+## markers 
+ubiquitous <- c("VAPA", "RPLP0", "HPRT1", "TBP",
+                "MRPL19", "ARF1","RAB7A") # Ubiquitous
+# ubiquitous <- data.table::fread("/homes/users/gfuentes/shared_data/refs/USTFs_Kribelbauer_2024.csv")
+# ubiquitous <- ubiquitous$UST
+
+ct_markers <- read.delim("/homes/users/gfuentes/shared_data/refs/hi_populations_markers.txt",
+                         stringsAsFactors=F)
+ct_markers <- ct_markers[ct_markers$CellType %in%
+                           unique(spicey_ctrl$cell_type),] # cell type spz
+# ct_markers <- data.table::fread("/homes/users/gfuentes/shared_data/refs/Islet_important_Motifs.csv")
+
+
+## disease 
+disease_paths <- list(
+  T1D = "/homes/users/gfuentes/shared_data/refs/T1D_GWAS_ASSOCIATIONS.tsv",
+  T2D = "/homes/users/gfuentes/shared_data/refs/T2D_GWAS_ASSOCIATIONS.tsv",
+  LUNG_CANCER = "/homes/users/gfuentes/shared_data/refs/LUNG_CANCER_ASSOCIATIONS.tsv",
+  SCHIZO = "/homes/users/gfuentes/shared_data/refs/SCHIZOFRENIA_ASSOCIATIONS.tsv",
+  RHEUMATOID = "/homes/users/gfuentes/shared_data/refs/RHEUMATOID_ASSOCIATIONS.tsv",
+  PSORIASIS = "/homes/users/gfuentes/shared_data/refs/PSORIASIS_ASSOCIATIONS.tsv"
+)
+```
+
+```{r umap fig.show='hold', out.width='49%', message=FALSE, warning=FALSE, fig.cap=c("UMAP RNA HPAP-CTRL" , "UMAP RNA HPAP-CTRL")}
+
+
+
+
+```
+
+# SPICEY at control sites 
+
+## Entropy 
+
+```{r entropy, message=FALSE, warning=FALSE}
+
+# CTRL -------------------------------------------------------------------------
+entropy_ctrl <- bind_rows(
+  # Tissue-specific data
+  spicey_ctrl %>%
+    data.frame() %>%
+    dplyr::filter(genes_coacc %in% ct_markers$Gene) %>%
+    mutate(type = "Tissue-specific"),
+
+  # Ubiquitous data
+  spicey_ctrl %>%
+    data.frame() %>%
+    dplyr::filter(genes_coacc %in% ubiquitous) %>%
+    mutate(type = "Ubiquitous")) %>%
+  mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
+         RETSI = as.numeric(RETSI),
+         GETSI_coacc = as.numeric(GETSI_coacc)) %>%
+  filter(
+    !is.na(RETSI),
+    !is.na(GETSI_coacc),
+    !is.na(type)) %>%
+  {rownames(.) <- NULL; .} %>%
+  filter(!is.na(GETSI_coacc),
+         !is.na(RETSI)) %>%
+  pivot_longer(cols = c(RETSI_entropy, GETSI_entropy_coacc),
+               names_to = "spicey_measure",
+               values_to = "value") %>%
+  mutate(spicey_measure = gsub("_entropy", "", spicey_measure)) %>%
+  ggplot(aes(x = type,
+             y = value,
+             fill = type)) +
+  geom_violin() +
+  geom_boxplot(alpha = 0.4) +  # Adjust outlier behavior if needed
+  theme_gray() +
+  labs(x = "", y = "Entropy") +
+  theme(
+    legend.position = "none",
+    ggside.panel.scale.x = 0.3,
+    axis.title = element_text(size = 10, margin = margin(t = 5)),
+    axis.text = element_text(size = 8, margin = margin(t = 2)),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(size = 8),
+    plot.title = element_text(size = 12)
+  ) +
+  scale_fill_manual(values = c(
+    "Ubiquitous" = "#919b74",
+    "Tissue-specific" = "#c8a77b"
+  )) +
+  # ylim(c(1,1.2))+
+  geom_signif(comparisons = list(
+    c("Tissue-specific", "Ubiquitous")),
+    y_position = c(1, 1.1),  # Adjust y position for annotations
+    map_signif_level = TRUE,  # Display significance level
+    textsize = 2.3,
+    vjust = 0.01,               # Moves text slightly above the line
+    tip_length = 0.02         # Negative value to flip arrows **upwards**
+  ) +
+  facet_grid(~spicey_measure) +
+  labs(title = "CTRL")
+
+
+
+```
+
+## Promoters
+
+```{r prom, message=FALSE, warning=FALSE}
+
+## CTRL ------------------------------------------------------------------------
+bind_rows(
+  # Tissue-specific data
+  spicey_ctrl %>%
+    data.frame() %>%
+    inner_join(ct_markers %>% dplyr::select(-c("Source")),
+               by = c("genes_coacc" = "Gene", "cell_type" = "CellType")) %>%
+    distinct(cell_type, genes_coacc, .keep_all = TRUE) %>%
+    mutate(type = "Tissue-specific"),
+
+  # Ubiquitous data
+  spicey_ctrl %>%
+    data.frame() %>%
+    dplyr::filter(genes_coacc %in% ubiquitous) %>%
+    mutate(type = "Ubiquitous")) %>%
+  mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
+         RETSI = as.numeric(RETSI)) %>%
+  filter(!is.na(RETSI),
+         !is.na(GETSI_coacc),
+         !is.na(type)) %>%
+  {rownames(.) <- NULL; .} %>%
+  mutate(region = paste0(seqnames, ":", start, "-", end)) %>%
+  filter(
+    (type == "Ubiquitous" & (RETSI_entropy > 0.5 | GETSI_entropy_coacc > 0.5)) |
+    (type == "Tissue-specific" & (RETSI_entropy < 0.25 | GETSI_entropy_coacc < 0.25))
+  ) %>%
+  filter(annotation == "Promoter") %>%
+  pivot_longer(cols = c(RETSI, GETSI_coacc),
+               names_to = "spicey_measure",
+               values_to = "value") %>%
+  mutate(
+    color_key = paste(type, spicey_measure, sep = "_")
+  ) %>%
+  ggplot(aes(x = value, color = color_key, fill = color_key)) +
+  geom_density(alpha = 0.6) +
+  ggside::geom_xsideboxplot(aes(y = spicey_measure, fill = color_key), orientation = "y") +
+  ggside::scale_xsidey_discrete() +
+  scale_y_continuous(name = "Density") +
+  scale_color_manual(values = c(
+    "Ubiquitous_RETSI" = "#656d4a",
+    "Ubiquitous_GETSI_coacc" = "#5e614b",
+    "Tissue-specific_RETSI" = "#b37a56",
+    "Tissue-specific_GETSI_coacc" = "#8c5e3c"
+  )) +
+  scale_fill_manual(values = c(
+    "Ubiquitous_RETSI" = "#a4ac86",
+    "Ubiquitous_GETSI_coacc" = "#919b74",
+    "Tissue-specific_RETSI" = "#D2B48C",
+    "Tissue-specific_GETSI_coacc" = "#c8a77b"
+  )) +
+
+  labs(x = "SPICEY measure") +
+  # ggtitle("Promoter regions") +
+  theme(
+    legend.position = "none",
+    ggside.panel.scale.x = 0.3,
+    axis.title = element_text(size = 10, margin = margin(t = 5)),  # smaller top margin
+    axis.text = element_text(size = 8, margin = margin(t = 2)),   # bring x-ticks closer
+    strip.text = element_text(size = 8),
+    plot.title = element_text(size = 12)
+  ) +
+  facet_grid(~ type) 
+
+
+ggsave(paste0(here::here("HPAP_CTRL/paper"), "/HPAP_CTRL_SPICEY_PROM.png"),
+       plot = last_plot(), width = 6.5, height = 4, units = "in", dpi = 300)
+
+
+```
+
+## Enhancers
+
+```{r enh, message=FALSE, warning=FALSE}
+
+## CTRL ------------------------------------------------------------------------
+bind_rows(
+  # Tissue-specific data
+  spicey_ctrl %>%
+    data.frame() %>%
+    inner_join(ct_markers %>% dplyr::select(-c("Source")),
+               by = c("genes_coacc" = "Gene", "cell_type" = "CellType")) %>%
+    distinct(cell_type, genes_coacc, .keep_all = TRUE) %>%
+    mutate(type = "Tissue-specific"),
+
+  # Ubiquitous data
+  spicey_ctrl %>%
+    data.frame() %>%
+    dplyr::filter(genes_coacc %in% ubiquitous) %>%
+    mutate(type = "Ubiquitous")) %>%
+  mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
+         RETSI = as.numeric(RETSI)) %>%
+  filter(!is.na(RETSI),
+         !is.na(GETSI_coacc),
+         !is.na(type)) %>%
+  {rownames(.) <- NULL; .} %>%
+  mutate(region = paste0(seqnames, ":", start, "-", end)) %>%
+  filter(
+    (type == "Ubiquitous" & (RETSI_entropy > 0.5 | GETSI_entropy_coacc > 0.5)) |
+    (type == "Tissue-specific" & (RETSI_entropy < 0.25 | GETSI_entropy_coacc < 0.25))
+  ) %>%
+  filter(annotation == "Distal") %>%
+  pivot_longer(cols = c(RETSI, GETSI_coacc),
+               names_to = "spicey_measure",
+               values_to = "value") %>%
+  mutate(
+    color_key = paste(type, spicey_measure, sep = "_")
+  ) %>%
+  ggplot(aes(x = value, color = color_key, fill = color_key)) +
+  geom_density(alpha = 0.6) +
+  ggside::geom_xsideboxplot(aes(y = spicey_measure, fill = color_key), orientation = "y") +
+  ggside::scale_xsidey_discrete() +
+  scale_y_continuous(name = "Density") +
+  scale_color_manual(values = c(
+    "Ubiquitous_RETSI" = "#656d4a",
+    "Ubiquitous_GETSI_coacc" = "#5e614b",
+    "Tissue-specific_RETSI" = "#b37a56",
+    "Tissue-specific_GETSI_coacc" = "#8c5e3c"
+  )) +
+  scale_fill_manual(values = c(
+    "Ubiquitous_RETSI" = "#a4ac86",
+    "Ubiquitous_GETSI_coacc" = "#919b74",
+    "Tissue-specific_RETSI" = "#D2B48C",
+    "Tissue-specific_GETSI_coacc" = "#c8a77b"
+  )) +
+
+  labs(x = "SPICEY measure") +
+  # ggtitle("Promoter regions") +
+  theme(
+    legend.position = "none",
+    ggside.panel.scale.x = 0.3,
+    axis.title = element_text(size = 10, margin = margin(t = 5)),  # smaller top margin
+    axis.text = element_text(size = 8, margin = margin(t = 2)),   # bring x-ticks closer
+    strip.text = element_text(size = 8),
+    plot.title = element_text(size = 12)
+  ) +
+  facet_grid(~ type)
+
+
+ggsave(paste0(here::here("HPAP_CTRL/paper"), "/HPAP_CTRL_SPICEY_ENH.png"),
+       plot = last_plot(), width = 6.5, height = 4, units = "in", dpi = 300)
+
+```
+
+```{r extra-enh, message=FALSE, warning=FALSE}
+
+se_immune <- readRDS("/homes/users/gfuentes/scratch/projects/spicey/data/SE_Tcells_Nature_2015_hg38.rds")
+
+spicey_ctrl <- spicey_ctrl %>% data.frame() %>% regioneR::toGRanges()
+spicey_at_control_enh <- subsetByOverlaps(spicey_ctrl, se_immune)
+spicey_at_control_enh <- spicey_at_control_enh %>%
+  data.frame() %>%
+  mutate(region = paste0(seqnames, ":", start, "-", end))
+
+spicey_ctrl <- data.frame(spicey_ctrl)
+# spicey_at_control_enh <- data.frame(spicey_at_control_enh)
+
+norm_counts <- bind_rows(
+  data.frame(spicey_ctrl) %>% mutate(source = "full"),
+  data.frame(spicey_at_control_enh) %>% mutate(source = "subset")) %>%
+  mutate(region = paste0(seqnames, ":", start, "-", end)) %>%
+  select(region, cell_type, RETSI, GETSI_coacc, source) %>%
+  pivot_longer(cols = c(RETSI, GETSI_coacc), names_to = "spicey_measure", values_to = "score") %>%
+  group_by(source, spicey_measure, region) %>%
+  slice_max(score, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  count(source, spicey_measure, cell_type) %>%
+  pivot_wider(names_from = source, values_from = n, values_fill = 0) %>%
+  rename(total_n = full, subset_n = subset) %>%
+  mutate(prop = subset_n / total_n)
+
+
+cell_order <- c("Acinar",
+                "Activated-stellate",
+                "Endothelial",
+                "Ductal",
+                "Quiescent-stellate",
+                "Unknown",
+                "Delta",
+                "Gamma",
+                "Beta",
+                "Alpha", 
+                "Immune")
+
+se_immune_plot <- norm_counts %>%
+  mutate(cell_type = factor(cell_type, levels = cell_order),
+         spicey_measure = factor(spicey_measure, levels = c("RETSI", "GETSI"))) %>%
+  ggplot(aes(x = spicey_measure, y = prop, fill = cell_type)) +
+  geom_bar(stat = "identity", position = "fill", color = "black") +
+  scale_y_continuous(labels = percent_format(accuracy = 1),
+                     name = "") +
+  scale_fill_manual(values = cell_colors) +
+  xlab("") +
+  # facet_grid(. ~ spicey_measure) +
+  theme_gray() +
+  theme(
+    ggside.panel.scale.x = 0.3,
+    axis.title = element_text(size = 10, margin = margin(t = 5)),  # smaller top margin
+    axis.text = element_text(size = 8, margin = margin(t = 2)),   # bring x-ticks closer
+    strip.text = element_text(size = 8),
+    plot.title = element_text(size = 12)) +
+  guides(fill = guide_legend(title = "Cell type")) +
+  ggtitle("SE CD4+ T cells")
+
+
+#### SE in HI
+# Pasquali, L., Gaulton, K., Rodríguez-Seguí, S. et al. Pancreatic islet enhancer clusters enriched in type 2 diabetes risk-associated variants. Nat Genet 46, 136–143 (2014). https://doi.org/10.1038/ng.2870
+se_hi <- readRDS("/homes/users/gfuentes/scratch/projects/spicey/data/islet_enhancers_datasets_hg38.rds")
+
+spicey_ctrl <- spicey_ctrl %>% regioneR::toGRanges()
+
+se_hi <- se_hi$hg38_cluster_enhancerClusters
+spicey_at_control_enh <- subsetByOverlaps(spicey_ctrl, se_hi)
+spicey_at_control_enh <- spicey_at_control_enh %>%
+  data.frame() %>%
+  mutate(region = paste0(seqnames, ":", start, "-", end)) 
+
+
+spicey_ctrl <- data.frame(spicey_ctrl)
+norm_counts <- bind_rows(
+  data.frame(spicey_ctrl) %>% mutate(source = "full"),
+  data.frame(spicey_at_control_enh) %>% mutate(source = "subset")) %>%
+  mutate(region = paste0(seqnames, ":", start, "-", end)) %>%
+  select(region, cell_type, RETSI, GETSI, source) %>%
+  pivot_longer(cols = c(RETSI, GETSI), names_to = "spicey_measure", values_to = "score") %>%
+  group_by(source, spicey_measure, region) %>%
+  slice_max(score, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  count(source, spicey_measure, cell_type) %>%
+  pivot_wider(names_from = source, values_from = n, values_fill = 0) %>%
+  rename(total_n = full, subset_n = subset) %>%
+  mutate(prop = subset_n / total_n)
+
+
+# cell_order <- c("Acinar",
+#                 "Activated-stellate",
+#                 "Endothelial",
+#                 "Ductal",
+#                 "Quiescent-stellate",
+#                 "Delta",
+#                 "Gamma",
+#                 "Beta",
+#                 "Alpha")
+
+se_hi_plot <- norm_counts %>%
+  mutate(cell_type = factor(cell_type, levels = cell_order),
+         spicey_measure = factor(spicey_measure, levels = c("RETSI", "GETSI"))) %>%
+  ggplot(aes(x = spicey_measure, y = prop, fill = cell_type)) +
+  geom_bar(stat = "identity", position = "fill", color = "black") +
+  scale_y_continuous(labels = percent_format(accuracy = 1),
+                     name = "% of dominant enhancers in subset") +
+  scale_fill_manual(values = cell_colors) +
+  xlab("") +
+  # facet_grid(. ~ spicey_measure) +
+  theme_gray() +
+  theme(
+    ggside.panel.scale.x = 0.3,
+    axis.title = element_text(size = 10, margin = margin(t = 5)),  # smaller top margin
+    axis.text = element_text(size = 8, margin = margin(t = 2)),   # bring x-ticks closer
+    strip.text = element_text(size = 8),
+    plot.title = element_text(size = 12)) +
+  guides(fill = guide_legend(title = "Cell type")) +
+  ggtitle("SE HI")
+
+
+# ggsave(paste0(here::here("CYT/figs"), "/CYT_SPICEY_SE_HI.png"),
+#        plot = last_plot(), width = 5, height = 4, units = "in", dpi = 300)
+
+combined <- ggpubr::ggarrange(se_hi_plot,
+                              se_immune_plot,
+                              ncol = 2,
+                              common.legend = TRUE,
+                              legend = "right",
+                              label.x = "SPICEY measure")
+
+ggpubr::annotate_figure(combined,
+                        bottom = ggpubr::text_grob("SPICEY measure", size = 10))
+
+
+ggsave(paste0(here::here("HPAP_CTRL/paper"), "/HPAP_CTRL_SPICEY_SUPERENH.png"),
+       plot = last_plot(), width = 6.5, height = 4, units = "in", dpi = 300)
+
+
+```
+
+
+# Genetics
+
+```{r functions-genetics, message=FALSE, warning=FALSE}
+
+# 1. Generic GWAS reader and converter to GRanges ------------------------------
+read_gwas_to_granges <- function(path) {
+  df <- fread(path)
+  if ("locations" %in% colnames(df)) {
+    df <- separate(df, locations, into = c("CHR_ID", "CHR_POS"), sep = ":", convert = TRUE)
+  }
+  stopifnot(all(c("CHR_ID", "CHR_POS") %in% colnames(df)))
+  
+  df <- df %>%
+    mutate(
+      CHR_ID = paste0("chr", CHR_ID),
+      CHR_POS = as.numeric(CHR_POS)
+    ) %>%
+    filter(!is.na(CHR_ID), !is.na(CHR_POS))
+  
+  makeGRangesFromDataFrame(df,
+    seqnames.field = "CHR_ID",
+    start.field = "CHR_POS",
+    end.field = "CHR_POS",
+    keep.extra.columns = FALSE,
+    ignore.strand = TRUE,
+    na.rm = TRUE
+  )
+}
+
+# 2. Calculate overlap summary per disease -------------------------------------
+get_gwas_overlap_summary <- function(spicey_gr, gwas_gr_list) {
+  map_dfr(names(gwas_gr_list), function(disease) {
+    gwas_gr <- gwas_gr_list[[disease]]
+    ov <- findOverlaps(spicey_gr, gwas_gr)
+    tibble(
+      disease = disease,
+      total_gwas = length(gwas_gr),
+      overlapping_gwas = length(unique(subjectHits(ov))),
+      prop = 100 * length(unique(subjectHits(ov))) / length(gwas_gr)
+    )
+  })
+}
+
+# 3. Find overlapping regions per disease --------------------------------------
+get_overlapping_regions <- function(spicey_gr, path) {
+  gwas_gr <- read_gwas_to_granges(path)
+  overlaps <- subsetByOverlaps(spicey_gr, gwas_gr)
+  unique(paste0(seqnames(overlaps), ":", start(overlaps), "-", end(overlaps)))
+}
+
+# 4. Create z-score matrix for heatmap -----------------------------------------
+make_zscore_matrix <- function(spicey_gr, region_df, score_var) {
+  spicey_df <- data.frame(spicey_gr) %>%
+    mutate(region = paste0(seqnames, ":", start, "-", end)) %>%
+    left_join(region_df, by = "region") %>%
+    filter(
+      !is.na(DISEASE),
+      RETSI_entropy < 1,
+      GETSI_entropy_coacc < 1,
+      !is.na(.data[[score_var]])
+    )
+  
+  spicey_df %>%
+    group_by(DISEASE, cell_type) %>%
+    summarise(score = mean(.data[[score_var]], na.rm = TRUE), .groups = "drop") %>%
+    pivot_wider(names_from = cell_type, values_from = score) %>%
+    column_to_rownames("DISEASE") %>%
+    as.matrix()
+}
+
+# 5. Main plotting function -----------------------------------------------------
+plot_heatmap_with_overlap <- function(spicey_gr, disease_paths, score_var, title) {
+  # Step 1: Read all GWAS into GRanges list
+  gwas_gr_list <- map(disease_paths, read_gwas_to_granges)
+
+  # Step 2: Summarize overlaps
+  gwas_overlap_summary <- get_gwas_overlap_summary(spicey_gr, gwas_gr_list)
+
+  # Step 3: Get overlapping regions and make a region->disease data.frame
+  region_lists <- map(disease_paths, ~get_overlapping_regions(spicey_gr, .x))
+  region_df <- stack(region_lists) %>% rename(region = values, DISEASE = ind)
+
+  # Step 4: Build score matrix
+  score_matrix <- make_zscore_matrix(spicey_gr, region_df, score_var)
+
+  # Handle edge case if score_matrix is empty
+  if (nrow(score_matrix) == 0 || ncol(score_matrix) == 0) {
+    stop("Score matrix is empty. No overlapping regions or no valid scores.")
+  }
+
+  # Step 5: Cluster and order
+  disease_order <- rownames(score_matrix)[hclust(dist(score_matrix))$order]
+  cell_type_order <- colnames(score_matrix)[hclust(dist(t(score_matrix)))$order]
+
+  # Step 6: Melt and annotate with z-score
+  plot_df <- as.data.frame(score_matrix) %>%
+    rownames_to_column("disease") %>%
+    pivot_longer(-disease, names_to = "cell_type", values_to = "score") %>%
+    group_by(disease) %>%
+    mutate(zscore = scale(score)[, 1]) %>%
+    ungroup() %>%
+    left_join(gwas_overlap_summary %>% select(disease, prop), by = "disease") %>%
+    mutate(
+      disease = factor(disease, levels = disease_order),
+      cell_type = factor(cell_type, levels = cell_type_order)
+    )
+
+  # Step 7: Plot
+  ggplot(plot_df, aes(x = cell_type, y = disease, fill = zscore)) +
+    geom_tile(color = "white", linewidth = 0.3) +
+    geom_point(aes(size = prop), color = "black", alpha = 0.7) +
+    scale_fill_gradientn(
+      colors = rev(RColorBrewer::brewer.pal(11, "RdBu")),
+      values = scales::rescale(c(min(plot_df$zscore, na.rm = TRUE), 0, max(plot_df$zscore, na.rm = TRUE))),
+      name = paste("Z-score")
+    ) +
+    scale_size_continuous(range = c(1, 7), name = "   prop.\noverlap") +
+    labs(x = NULL, y = "Disease") +
+    theme_gray() +
+    theme(
+      panel.grid = element_blank(),
+      axis.text.x = element_text(angle = 35, hjust = 1, size = 8),
+      axis.text.y = element_text(size = 8),
+      axis.title = element_text(size = 10),
+      plot.title = element_text(size = 12)
+    ) +
+    ggtitle(title)
+}
+
+```
+
+```{r genetics-heatmap, message=FALSE, warning=FALSE}
+
+spicey_cyt <- spicey_cyt %>% 
+  data.frame() %>%
+  regioneR::toGRanges()
+
+spicey_ctrl <- spicey_ctrl %>% 
+  data.frame() %>%
+  regioneR::toGRanges()
+
+gwas_retsi_plot <- plot_heatmap_with_overlap(spicey_cyt, disease_paths, "RETSI", "RETSI")
+gwas_getsi_plot <- plot_heatmap_with_overlap(spicey_cyt, disease_paths, "GETSI_coacc", "GETSI_coacc")
+
+cyt_gwas <- ggpubr::ggarrange(
+  gwas_retsi_plot, 
+  gwas_getsi_plot,
+  ncol = 2, 
+  common.legend = TRUE,
+  legend = "right"
+)
+annotate_figure(cyt_gwas,
+                top = text_grob("CYT", size = 12))
+
+ggsave(paste0(here::here("CYT/figs"), "/CYT_GWAS_SPICEY.png"),
+       plot = last_plot(), width = 7, height = 4, units = "in", dpi = 300)
+
+
+
+## CTRL
+gwas_retsi_plot <- plot_heatmap_with_overlap(spicey_ctrl, disease_paths, "RETSI", "RETSI")
+gwas_getsi_plot <- plot_heatmap_with_overlap(spicey_ctrl, disease_paths, "GETSI_coacc", "GETSI_coacc")
+
+ctrl_gwas <- ggpubr::ggarrange(
+  gwas_retsi_plot, 
+  gwas_getsi_plot,
+  ncol = 2, 
+  common.legend = TRUE,
+  legend = "right"
+)
+annotate_figure(ctrl_gwas,
+                top = text_grob("CTRL", size = 12))
+
+ggsave(paste0(here::here("CYT/figs"), "/CTRL_GWAS_SPICEY.png"),
+       plot = last_plot(), width = 7, height = 4, units = "in", dpi = 300)
+
+```
+
+# RETSI enrichmetn at: IREs vs SREs
+
+
+```{r re-genetics-heatmap, message=FALSE, warning=FALSE}
+
+## IRE ----
+re_cyt_bulk <- readRDS("/homes/users/gfuentes/shared_data/projects-data/cytokines/_targets/objects/BLK_CYT_RE_HI")
+ols <- findOverlaps(spicey_cyt, re_cyt_bulk)
+retsi_re_cyt <- spicey_cyt[queryHits(ols),]
+mcols(retsi_re_cyt) <- cbind(mcols(retsi_re_cyt),
+                             mcols(re_cyt_bulk)[,c("type", "subgroup1", "subgroup2")][subjectHits(ols),])
+
+gwas_retsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$type == "IRE", ], disease_paths, "RETSI", "RETSI")
+gwas_getsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$type == "IRE", ], disease_paths, "GETSI_coacc", "GETSI_coacc")
+
+cyt_gwas <- ggpubr::ggarrange(
+  gwas_retsi_plot, 
+  gwas_getsi_plot,
+  ncol = 2, 
+  common.legend = TRUE,
+  legend = "right"
+)
+annotate_figure(cyt_gwas,
+                top = text_grob("CYT", size = 12))
+
+ggsave(paste0(here::here("CYT/figs"), "/CYT_IRE_GWAS_SPICEY.png"),
+       plot = last_plot(), width = 7, height = 4, units = "in", dpi = 300)
+
+
+
+## CTRL
+re_cyt_bulk <- readRDS("/homes/users/gfuentes/shared_data/projects-data/cytokines/_targets/objects/BLK_CYT_RE_HI")
+ols <- findOverlaps(spicey_ctrl, re_cyt_bulk)
+retsi_re_cyt <- spicey_ctrl[queryHits(ols),]
+mcols(retsi_re_cyt) <- cbind(mcols(retsi_re_cyt),
+                             mcols(re_cyt_bulk)[,c("type", "subgroup1", "subgroup2")][subjectHits(ols),])
+
+gwas_retsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$type == "IRE", ], disease_paths, "RETSI", "RETSI")
+gwas_getsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$type == "IRE", ], disease_paths, "GETSI_coacc", "GETSI_coacc")
+
+cyt_gwas <- ggpubr::ggarrange(
+  gwas_retsi_plot, 
+  gwas_getsi_plot,
+  ncol = 2, 
+  common.legend = TRUE,
+  legend = "right"
+)
+annotate_figure(cyt_gwas,
+                top = text_grob("CTRL", size = 12))
+
+ggsave(paste0(here::here("CYT/figs"), "/CTRL_IRE_GWAS_SPICEY.png"),
+       plot = last_plot(), width = 7, height = 4, units = "in", dpi = 300)
+
+
+
+## SREs ----
+re_cyt_bulk <- readRDS("/homes/users/gfuentes/shared_data/projects-data/cytokines/_targets/objects/BLK_CYT_RE_HI")
+ols <- findOverlaps(spicey_cyt, re_cyt_bulk)
+retsi_re_cyt <- spicey_cyt[queryHits(ols),]
+mcols(retsi_re_cyt) <- cbind(mcols(retsi_re_cyt),
+                             mcols(re_cyt_bulk)[,c("type", "subgroup1", "subgroup2")][subjectHits(ols),])
+
+gwas_retsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$type == "SRE", ], disease_paths, "RETSI", "RETSI")
+gwas_getsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$type == "SRE", ], disease_paths, "GETSI_coacc", "GETSI_coacc")
+
+cyt_gwas <- ggpubr::ggarrange(
+  gwas_retsi_plot, 
+  gwas_getsi_plot,
+  ncol = 2, 
+  common.legend = TRUE,
+  legend = "right"
+)
+annotate_figure(cyt_gwas,
+                top = text_grob("CYT", size = 12))
+
+ggsave(paste0(here::here("CYT/figs"), "/CYT_SRE_GWAS_SPICEY.png"),
+       plot = last_plot(), width = 7, height = 4, units = "in", dpi = 300)
+
+
+
+## CTRL
+re_cyt_bulk <- readRDS("/homes/users/gfuentes/shared_data/projects-data/cytokines/_targets/objects/BLK_CYT_RE_HI")
+ols <- findOverlaps(spicey_ctrl, re_cyt_bulk)
+retsi_re_cyt <- spicey_ctrl[queryHits(ols),]
+mcols(retsi_re_cyt) <- cbind(mcols(retsi_re_cyt),
+                             mcols(re_cyt_bulk)[,c("type", "subgroup1", "subgroup2")][subjectHits(ols),])
+
+gwas_retsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$type == "SRE", ], disease_paths, "RETSI", "RETSI")
+gwas_getsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$type == "SRE", ], disease_paths, "GETSI_coacc", "GETSI_coacc")
+
+cyt_gwas <- ggpubr::ggarrange(
+  gwas_retsi_plot, 
+  gwas_getsi_plot,
+  ncol = 2, 
+  common.legend = TRUE,
+  legend = "right"
+)
+annotate_figure(cyt_gwas,
+                top = text_grob("CTRL", size = 12))
+
+ggsave(paste0(here::here("CYT/figs"), "/CTRL_SRE_GWAS_SPICEY.png"),
+       plot = last_plot(), width = 7, height = 4, units = "in", dpi = 300)
+
+```
+
+
+```{r test-primed}
+
+
+## PRIMED IRE ----
+re_cyt_bulk <- readRDS("/homes/users/gfuentes/shared_data/projects-data/cytokines/_targets/objects/BLK_CYT_RE_HI")
+ols <- findOverlaps(spicey_cyt, re_cyt_bulk)
+retsi_re_cyt <- spicey_cyt[queryHits(ols),]
+mcols(retsi_re_cyt) <- cbind(mcols(retsi_re_cyt),
+                             mcols(re_cyt_bulk)[,c("type", "subgroup1", "subgroup2")][subjectHits(ols),])
+
+gwas_retsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$subgroup2 == "Primed IRE", ], disease_paths, "RETSI", "RETSI")
+gwas_getsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$subgroup2 == "Primed IRE", ], disease_paths, "GETSI_coacc", "GETSI_coacc")
+
+cyt_gwas <- ggpubr::ggarrange(
+  gwas_retsi_plot, 
+  gwas_getsi_plot,
+  ncol = 2, 
+  common.legend = TRUE,
+  legend = "right"
+)
+annotate_figure(cyt_gwas,
+                top = text_grob("CYT", size = 12))
+
+ggsave(paste0(here::here("CYT/figs"), "/CYT_PRIMED_GWAS_SPICEY.png"),
+       plot = last_plot(), width = 7, height = 4, units = "in", dpi = 300)
+
+
+
+## CTRL
+gwas_retsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$subgroup2 == "Primed IRE", ], disease_paths, "RETSI", "RETSI")
+gwas_getsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$subgroup2 == "Primed IRE", ], disease_paths, "GETSI_coacc", "GETSI_coacc")
+
+cyt_gwas <- ggpubr::ggarrange(
+  gwas_retsi_plot, 
+  gwas_getsi_plot,
+  ncol = 2, 
+  common.legend = TRUE,
+  legend = "right"
+)
+annotate_figure(cyt_gwas,
+                top = text_grob("CTRL", size = 12))
+
+ggsave(paste0(here::here("CYT/figs"), "/CTRL_PRIMED_GWAS_SPICEY.png"),
+       plot = last_plot(), width = 7, height = 4, units = "in", dpi = 300)
+
+
+
+
+## NEO IRE ----
+re_cyt_bulk <- readRDS("/homes/users/gfuentes/shared_data/projects-data/cytokines/_targets/objects/BLK_CYT_RE_HI")
+ols <- findOverlaps(spicey_cyt, re_cyt_bulk)
+retsi_re_cyt <- spicey_cyt[queryHits(ols),]
+mcols(retsi_re_cyt) <- cbind(mcols(retsi_re_cyt),
+                             mcols(re_cyt_bulk)[,c("type", "subgroup1", "subgroup2")][subjectHits(ols),])
+
+gwas_retsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$subgroup2 == "Neo IRE", ], disease_paths, "RETSI", "RETSI")
+gwas_getsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$subgroup2 == "Neo IRE", ], disease_paths, "GETSI_coacc", "GETSI_coacc")
+
+cyt_gwas <- ggpubr::ggarrange(
+  gwas_retsi_plot, 
+  gwas_getsi_plot,
+  ncol = 2, 
+  common.legend = TRUE,
+  legend = "right"
+)
+annotate_figure(cyt_gwas,
+                top = text_grob("CYT", size = 12))
+
+ggsave(paste0(here::here("CYT/figs"), "/CYT_NEO_GWAS_SPICEY.png"),
+       plot = last_plot(), width = 7, height = 4, units = "in", dpi = 300)
+
+
+
+## CTRL
+gwas_retsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$subgroup2 == "Neo IRE", ], disease_paths, "RETSI", "RETSI")
+gwas_getsi_plot <- plot_heatmap_with_overlap(retsi_re_cyt[retsi_re_cyt$subgroup2 == "Neo IRE", ], disease_paths, "GETSI_coacc", "GETSI_coacc")
+
+cyt_gwas <- ggpubr::ggarrange(
+  gwas_retsi_plot, 
+  gwas_getsi_plot,
+  ncol = 2, 
+  common.legend = TRUE,
+  legend = "right"
+)
+annotate_figure(cyt_gwas,
+                top = text_grob("CTRL", size = 12))
+
+ggsave(paste0(here::here("CYT/figs"), "/CTRL_NEO_GWAS_SPICEY.png"),
+       plot = last_plot(), width = 7, height = 4, units = "in", dpi = 300)
+
+
+```
+
