@@ -20,4 +20,4 @@
 module load Singularity/3.8.7-GCCcore-13.2.0
 
 # write the code you will run in the clusster
-singularity exec /scratch/lab_lpasquali/shared_data/rstudio-singularity/bioconductor_R-4.4.2_RELEASE_3_20_MACS2.sif Rscript /homes/users/gfuentes/scratch/projects/spicey_old/HPAP_CTRL/code/DIFF_HPAP.R
+singularity exec /scratch/lab_lpasquali/shared_data/rstudio-singularity/bioconductor_R-4.4.2_RELEASE_3_20_MACS2.sif Rscript /homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/code/DIFF_HPAP.R

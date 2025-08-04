@@ -11,7 +11,7 @@ library(tidyr)
 library(ggh4x)
 library(ggsci)
 
-ctrls <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_old/HPAP_CTRL/data/CTRL_HPAP.rds")
+ctrls <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/data/CTRL_HPAP.rds")
 
 cell_colors <- c("Alpha" = "#008E80",
                  "Ductal" = "#5A7A98",
@@ -36,7 +36,7 @@ props <- ctrls@meta.data %>%
   ungroup()
 
 wide_props <- props %>%
-  select(orig.ident, cell_type, prop) %>%
+  dplyr::select(orig.ident, cell_type, prop) %>%
   pivot_wider(names_from = cell_type, values_from = prop, values_fill = 0)
 
 prop_matrix <- as.data.frame(wide_props[,-1])
@@ -50,7 +50,7 @@ wide_props$orig.ident <- factor(wide_props$orig.ident, levels = wide_props$orig.
 plot_data <- wide_props %>%
   pivot_longer(cols = -orig.ident, names_to = "cell_type", values_to = "prop") %>%
   left_join(ctrls@meta.data %>%
-              select(orig.ident, RNA_scSorter.Pred_Type.predicted.id),
+              dplyr::select(orig.ident, RNA_scSorter.Pred_Type.predicted.id),
             by = "orig.ident")
 
 total_cells <- ctrls@meta.data %>%
@@ -111,4 +111,98 @@ ggsave(paste0(here::here("HPAP_CTRL/figs"), "/HPAP_celltypes_clustering.png"),
 # Subset samples ----
 samples_to_keep <- c("HPAP-053", "HPAP-075", "HPAP-077", "HPAP-049", "HPAP-063")
 hpap_subset <- subset(ctrls, subset = orig.ident %in% samples_to_keep)
-saveRDS(hpap_subset, "/homes/users/gfuentes/scratch/projects/spicey_old/HPAP_CTRL/data/SUBSET_CTRL_HPAP_2.rds")
+saveRDS(hpap_subset, "/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/data/SUBSET_CTRL_HPAP_2.rds")
+
+
+
+# UMAP plot
+hpap_subset$cell_type <- hpap_subset$integrated_clusters_names
+hpap_subset$cell_type <- gsub("_A", "", hpap_subset$cell_type)
+hpap_subset$cell_type <- gsub("_B", "", hpap_subset$cell_type)
+hpap_subset$cell_type <- gsub("Act_stellate", "Stellate", hpap_subset$cell_type)
+hpap_subset$cell_type <- gsub("Quies_stellate", "Stellate", hpap_subset$cell_type)
+
+celltypes_to_keep <- names(which(table(hpap_subset$cell_type) > 100))
+Idents(hpap_subset) <- hpap_subset$cell_type
+hpap_subset <- subset(hpap_subset, idents = celltypes_to_keep)
+
+
+cell_colors <- c("Alpha" = "#008E80",
+                 "Ductal" = "#5A7A98",
+                 "Beta" = "#D37972",
+                 "Delta" = "#fcbbb6",
+                 "Acinar" = "#B4609B",
+                 "Gamma" = "#C6E6FF",
+                 "Stellate" = "#fbb679",
+                 "Unknown" = "#c7c7c7",
+                 "Immune" = "#7E9F66",
+                 "Epsilon" = "#A3D2CA",
+                 "Endothelial" = "#87abbf")
+
+DimPlot(hpap_subset, reduction = "umap.har", group.by = "cell_type",
+        label = TRUE, pt.size = 0.5) +
+  labs(title = "") +
+  theme_gray() +
+  NoLegend() +
+  scale_color_manual(values = cell_colors)
+
+ggsave(paste0(here::here("HPAP_CTRL/figs"), "/HPAP_UMAP_subset.png"),
+       plot = last_plot(), width = 7, height = 6, units = "in", dpi = 300)
+
+
+## all ---
+ctrls$cell_type <- ctrls$integrated_clusters_names
+ctrls$cell_type <- gsub("_A", "", ctrls$cell_type)
+ctrls$cell_type <- gsub("_B", "", ctrls$cell_type)
+ctrls$cell_type <- gsub("Act_stellate", "Stellate", ctrls$cell_type)
+ctrls$cell_type <- gsub("Quies_stellate", "Stellate", ctrls$cell_type)
+
+celltypes_to_keep <- names(which(table(ctrls$cell_type) > 100))
+Idents(ctrls) <- ctrls$cell_type
+ctrls <- subset(ctrls, idents = celltypes_to_keep)
+
+
+cell_colors <- c("Alpha" = "#008E80",
+                 "Ductal" = "#5A7A98",
+                 "Beta" = "#D37972",
+                 "Delta" = "#fcbbb6",
+                 "Acinar" = "#B4609B",
+                 "Gamma" = "#C6E6FF",
+                 "Stellate" = "#fbb679",
+                 "Unknown" = "#c7c7c7",
+                 "Immune" = "#7E9F66",
+                 "Epsilon" = "#A3D2CA",
+                 "Endothelial" = "#87abbf")
+
+DimPlot(ctrls, reduction = "umap.har", group.by = "cell_type",
+        label = TRUE, pt.size = 0.5) +
+  labs(title = "") +
+  theme_gray() +
+  NoLegend() +
+  scale_color_manual(values = cell_colors)
+
+ggsave(paste0(here::here("HPAP_CTRL/figs"), "/HPAP_UMAP.png"),
+       plot = last_plot(), width = 7, height = 6, units = "in", dpi = 300)
+
+
+(DimPlot(ctrls, reduction = "umap.har", group.by = "cell_type",
+        label = TRUE, pt.size = 0.5) +
+  labs(title = "") +
+  theme_gray() +
+  NoLegend() +
+  xlab("UMAP 1") +
+  ylab("UMAP 2") +
+  scale_color_manual(values = cell_colors)) +
+  ggtitle("HPAP samples") +
+(DimPlot(hpap_subset, reduction = "umap.har", group.by = "cell_type",
+          label = TRUE, pt.size = 0.5) +
+  labs(title = "") +
+  theme_gray() +
+  NoLegend() +
+  xlab("UMAP 1") +
+  ylab("UMAP 2") +
+  scale_color_manual(values = cell_colors) +
+  ggtitle("Filtered HPAP samples"))
+
+ggsave(paste0(here::here("HPAP_CTRL/figs"), "/HPAP_UMAP_FINAL.png"),
+       plot = last_plot(), width = 8, height = 5, units = "in", dpi = 300)

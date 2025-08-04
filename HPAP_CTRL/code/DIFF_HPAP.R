@@ -15,10 +15,12 @@ library(future)
 library(DESeq2)
 
 # Load dataset
-re <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_old/test_T1D/data/T1D_HPAP.rds")
-re$cell_type <- re$RNA_scSorter.Pred_Type.predicted.id
-re$cell_type <- gsub("Activated-stellate", "Stellate", re$cell_type)
-re$cell_type <- gsub("Quiescent-stellate", "Stellate", re$cell_type)
+re <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/data/SUBSET_CTRL_HPAP_2.rds")
+re$cell_type <- re$integrated_clusters_names
+re$cell_type <- gsub("_A", "", re$cell_type)
+re$cell_type <- gsub("_B", "", re$cell_type)
+re$cell_type <- gsub("Act_stellate", "Stellate", re$cell_type)
+re$cell_type <- gsub("Quies_stellate", "Stellate", re$cell_type)
 
 celltypes_to_keep <- names(which(table(re$cell_type) > 100))
 Idents(re) <- re$cell_type
@@ -76,16 +78,18 @@ gr_list <- expand.grid(celltype = valid_cell_types) %>%
   pmap(~ findmarkers(re, .x)) %>%
   compact()  # Remove NULL entries
 
-saveRDS(gr_list, "/homes/users/gfuentes/scratch/projects/spicey_old/test_T1D/data/DA_ATAC_HPAP-T1D.rds")
+saveRDS(gr_list, "/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/data/DA_ATAC_HPAP-CTRL.rds")
 
 
 
 ### RNA ----
 # Load dataset
-re <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_old/test_T1D/data/T1D_HPAP.rds")
-re$cell_type <- re$RNA_scSorter.Pred_Type.predicted.id
-re$cell_type <- gsub("Activated-stellate", "Stellate", re$cell_type)
-re$cell_type <- gsub("Quiescent-stellate", "Stellate", re$cell_type)
+re <- readRDS("/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/data/SUBSET_CTRL_HPAP_2.rds")
+re$cell_type <- re$integrated_clusters_names
+re$cell_type <- gsub("_A", "", re$cell_type)
+re$cell_type <- gsub("_B", "", re$cell_type)
+re$cell_type <- gsub("Act_stellate", "Stellate", re$cell_type)
+re$cell_type <- gsub("Quies_stellate", "Stellate", re$cell_type)
 
 celltypes_to_keep <- names(which(table(re$cell_type) > 100))
 Idents(re) <- re$cell_type
@@ -136,4 +140,4 @@ gr_list <- expand.grid(celltype = valid_cell_types) %>%
   pmap(~ findmarkers(re, .x)) %>%
   compact()  # Remove NULL entries
 names(gr_list) <- valid_cell_types
-saveRDS(gr_list, "/homes/users/gfuentes/scratch/projects/spicey_old/test_T1D/data/DA_RNA_HPAP-T1D.rds")
+saveRDS(gr_list, "/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/data/DA_RNA_HPAP-CTRL.rds")
