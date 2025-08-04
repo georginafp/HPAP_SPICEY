@@ -35,7 +35,7 @@ main_textcol: "#FFFFFF"
 main_textaplha: 100
 main_textsize: "80pt"
 main_findings:
-  - "![](figs/logo_spicey.png){ width=5% }"
+  - "![](figs/logo_spicey.png){ width=2.5% }"
   - "**SPICEY: An R package for assessing tissue specificity from single cell multi-omics data**"
 # logoleft_name: Figures/DEPT.CESt_blanc_heng.png
 # logoleft_width: "0.05%" # Significantly reduced the size
@@ -58,8 +58,7 @@ logoright_name: "Figures/funding2.svg"
 logoright_position: "top"
 ---
 
-
----
+------------------------------------------------------------------------
 
 ```{r setup, include=FALSE}
 
@@ -130,8 +129,6 @@ cell_colors <- c("Alpha" = "#008E80",
 
 ```
 
-
-```{=html}
 <style>
   #main-img-left, #main-img-center, #main-img-right {
     width: 27%;
@@ -147,7 +144,6 @@ cell_colors <- c("Alpha" = "#008E80",
     font-size: 32pt;
   }
 </style>
-```
 
 ```{css, echo=FALSE}
 .table caption {
@@ -157,16 +153,16 @@ cell_colors <- c("Alpha" = "#008E80",
 
 # Overview
 
-SPICEY (SPecificity Index for Coding and Epigenetic activitY) is an R package designed to quantify cell-type specificity across single cell multi-omic data. 
+SPICEY (SPecificity Index for Coding and Epigenetic activitY) is an R package designed to quantify cell-type specificity across single cell multi-omic data.
 
 # Methods
 
 ## Cell type specificity indices
 
--   **RETSI** (Regulatory Element Tissue Specificity Index): quantifies cell-type specificity of regulatory regions across cell types.
--   **GETSI** (Gene Expression Tissue Specificity Index): measures cell-type specificity of gene expression patterns across cell types.
+-   **RETSI** (Regulatory Element Tissue Specificity Index): quantifies cell-type specificity of regulatory regions.
+-   **GETSI** (Gene Expression Tissue Specificity Index): measures cell-type specificity of genes.
 
-Both are calculated using a weighted specificity score for each feature (regulatory region or gene), reflecting the level of enrichment in each cell type, as follows: 
+Both metrics are based on weighted specificity scores that quantify how enriched each feature (gene or regulatory region) is within individual cell types: 
 
 $$
 TSI_{i,x} = \frac{FC_{i,x}}{\max(FC)_x} \cdot w_{i,x}
@@ -182,14 +178,9 @@ where:
 -   $x \in \{r, g\}$, with $r$ for regulatory region (RETSI) and $g$ for gene (GETSI)
 -   $\text{FC}_{i,x}$ = log fold-change of feature $x$ in cell type $i$
 
-To facilitate the construction of cell-type specific regulatory networks, SPICEY associates regulatory elements with their likely target genes by either:
+## Entropy-based specificity Indices
 
-1.  **Nearest-gene assignment:** based on proximity to the closest transcription start site (TSS).
-2.  **Co-accessibility-based linking:** leveraging co-accessible links in chromatin accessibility (e.g., via Cicero).
-
-## Entropy-based Specificity Indices
-
-SPICEY alternatively uses an entropy-based approach to measure the distributional skewness of feature activity across cell types, as follows: 
+To measure the distributional skewness of feature activity across cell types:
 
 $$
 H = - \sum_{i=1}^{N} p_i \log_2(p_i)
@@ -197,8 +188,7 @@ $$
 
 $$
 H_{norm} = 1 - e^{H}
-$$
-where:
+$$ where:
 
 -   $i$ = cell type
 -   $p_{i,x} = \frac{a_{i,x}}{\sum_{j=1}^{N} a_{j,x}}$ = activity or expression of feature $x$ across $N$ cell types
@@ -206,20 +196,22 @@ where:
 
 Feature activity or expression is normalized across cell types to follow a probability distribution; low entropy means specific to few cell types, high entropy means spread out evenly.
 
+## Region-to-gene annotation
+
+Using (1) either **nearest-gene** (based on proximity to the closest TSS) or (2) **co-accessibility** (using correlated chromatin accessibility) to help construct tissue-specific gene-regulatory networks.
+
+
 # Results
 
-SPICEY was applied to single-nucleus ATAC-seq and RNA-seq data from 5 non-diabetic human pancreatic islets from the Human Pancreas Analysis Program (HPAP) (@ref) (**Figure** \@ref(fig:suplementary1)) to quantify cell-type specificity, and co-accessibility links were used to assign distal regulatory elements to genes. Distribution values of the SPICEY scores revealed distinct specificity patterns across cell types (**Figure** \@ref(fig:main1)), reflecting heterogeneous regulatory and transcriptional landscapes within the pancreatic islets.
+SPICEY scores from 5 non-diabetic human pancreatic islets (HPAP) (**Figure** \@ref(fig:suplementary1)) revealed distinct specificity patterns across cell types, highlighting the heterogeneous regulatory and transcriptional landscape of the pancreatic islets (**Figure** \@ref(fig:main1)).
 
-```{r suplementary1, fig.align='center', fig.cap="(ref:suplementary1)", fig.show='hold', message=FALSE, warning=FALSE, out.width="95%"}
+```{r suplementary1, fig.align='center', fig.cap="(ref:suplementary1)", fig.show='hold', message=FALSE, warning=FALSE, out.width="90%", out.height="90%"}
 knitr::include_graphics("/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/posters/figs/HPAP_UMAP_subset.png")
 ```
 
-(ref:suplementary1) *Joint UMAP visualization of cell types in human pancreatic tissue derived from single-cell data*. The UMAP uses weighted nearest neighbor (WNN) integration of RNA and chromatin accessibility (ATAC) profiles from a subset of 5 non-diabetic HPAP donors with comparable cell numbers and cell type distributions. Each point represents a nucleus and is colored by predicted cell type.
+(ref:suplementary1) *Joint snATAC and RNA UMAP of human pancreatic islet cell types* from 5 non-diabetic HPAP donors. Each point represents a nucleus and is colored by predicted cell type.
 
-SPICEY scores for promoters and enhancers linked to known ubiquitous and tissue-specific genes showed that tissue-specific sites have significantly higher specificity, indicating that cell-type-specific gene expression aligns with cell-specific regulatory activity. This demonstrates SPICEY’s ability to capture regulatory and transcriptional specificity in human pancreatic islets (**Figure** \@ref(fig:main1)).
-
-Additionally, entropy measures revealed that ubiquitous sites had higher entropy, indicating broad activity across cell types while tissue-specific sites showed significantly lower entropy (p < 0.001), reflecting more restricted cell-type-specific activity (**Figure** \@ref(fig:main1)). This demonstrates that SPICEY’s entropy metric reliably captures cell-type specificity.
-
+Tissue-specific promoters and enhancers have higher specificity than ubiquitous ones, showing that cell-type-specific gene expression aligns with cell-specific cis-regulatory activity.  (**Figure** \@ref(fig:main1)). Ubiquitous sites have higher entropy -indicating widespread activity- while tissue-specific sites have significantly lower entropy -reflecting a bias towards cell-type-specific activity- (**Figure** \@ref(fig:main1)), confirming that SPICEY effectively captures regulatory and transcriptional specificity in human pancreatic islets.
 
 ```{r main1, message=FALSE, warning=FALSE, fig.show="hold", echo=FALSE, fig.cap="(ref:main1)", fig.width=5, fig.height=9}
 
@@ -656,9 +648,9 @@ cowplot::plot_grid(
 
 ```
 
-(ref:main1) *SPICEY scores capture cell-type-specific regulatory patterns.* (A) SPICEY score distributions highlight higher specificity in tissue-specific genes/elements (brown) compared to ubiquitous ones (green). (B–C) Promoter and distal regions show significantly elevated SPICEY scores for tissue-specific genes. (D–E) Entropy analyses reveal lower entropy for tissue-specific features, confirming stronger cell-type restriction, especially in RETSI scores stratified by region.
+(ref:main1) *SPICEY reveals cell-type-specificity.* (A) Distribution values reflect higher specificity in tissue-specific features (brown) compared to ubiquitous (green). (B–C) Promoter and distal regions show higher SPICEY scores for tissue-specific genes. (D–E) Entropy metrics reveal lower values for tissue-specific features, confirming stronger cell-type specificity.
 
-In endocrine cells, SPICEY identified key known markers like *INS* and *IGF2* (beta), *SST* (delta), and *IRX1/IRX2* (alpha), along with less common ones like *ADCYAP1* and *SIX"* (beta) and *LRFN5* (delta). Although *GCG* wasn’t top-ranked in alpha cells, its high raw specificity supported its relevance. In non-endocrine cells, SPICEY recovered established markers *REG1A/B* (acinar), *PI3* and *KRT family* (ductal) and *COL6A1* (stellate) and highlighted novel candidates like *GIMAP* genes in endothelial cells (**Figure** \@ref(main2)).
+SPICEY identified well-known markers in endocrine cells (*INS, IGF2, SST, IRX1/IRX2*) as well as less common ones like *ADCYAP1, SIX2*, and *LRFN5.* It recovered established markers such as *REG1A/B, PI3, KRT* family, and *COL6A1*, for non-endocrine cells while also highlighting novel candidates like *GIMAP* genes in endothelial cells (**Figure** \@ref(fig:main2)).
 
 ```{r main2, message=FALSE, warning=FALSE, fig.show="hold", echo=FALSE, fig.cap="(ref:main2)", fig.width=5, fig.height=9}
 
@@ -668,16 +660,13 @@ SPICEY::spicey_heatmap(df = SPICEY_ANNOTATED_COACC$linked,
                        top_n = 5)
 
 ```
-(ref:main2) *Heatmap of top cell-type-specific genes based on SPICEY scores.* This heatmap shows the top 5 genes per cell type ranked by RETSI and GETSI z-scores. Each row is a gene, and each column represents a different cell type. Darker colors indicate higher specificity, meaning stronger chromatin accessibility or gene expression unique to that cell type.
+
+(ref:main2) *Top SPICEY cell-type-specific features.* The heatmap displays the top 5 genes for each cell type based on RETSI and GETSI z-scores. Rows represent genes and columns represent cell types. Darker colors indicate higher specificity. 
 
 # Conclusions
 
-* SPICEY is an R package for quantifying cell-type specificity from single-cell multi-omic data. It combines differential analysis with entropy-based scoring through two integrated metrics.
+* SPICEY is an R package that quantifies cell-type specificity from single-cell multi-omic data using combined differential and entropy-based metrics, making it ideal for studying complex tissues using common single-cell workflows.
 
-* Detects both known and novel markers in well-defined and less-characterized endocrine and non-endocrine cell types, and distinguishes tissue-specific from broadly active features.
+* It identifies both known and novel markers across well-defined and less-studied cell types, distinguishing tissue-specific from broadly active features.
 
-* By leveraging co-accessibility to link distal regulatory elements to target genes, SPICEY facilitates the identification of coordinated regulatory programs.
-
-* SPICEY provides a versatile framework for integrating single-cell multi-omic data, ideal for studying regulatory specificity in complex tissues using common single-cell analysis pipelines.
-
-
+* Annotates regulatory elements to target genes helping uncover coordinated regulatory networks.
