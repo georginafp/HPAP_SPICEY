@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>POSTER_EUROBIOC_20250805.knit</title>
+
+
+
+
+
+
+
+<!--
+Font-awesome icons ie github or twitter
+-->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/brands.css" integrity="sha384-n9+6/aSqa9lBidZMRCQHTHKJscPq6NW4pCQBiMmHdUCvPN8ZOg2zJJTkC7WIezWv" crossorigin="anonymous">
+
+<!--
+Google fonts api stuff
+-->
+<link href='https://fonts.googleapis.com/css?family=NimbusSanCond' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css?family=Rasa' rel='stylesheet'>
+
+<!--
+Here are the required style attributes for css to make this poster work :)
+-->
+<style>
+@page {
+size: 33.1in 46.8in;
+margin: 0;
+padding: 0;
+}
+body {
+margin: 0px;
+padding: 0px;
+width: 33.1in;
+height: 46.8in;
+text-align: justify;
+font-size: 28pt;
+line-height: 1.05;
+}
+/* RMarkdown Class Styles */
+/* center align leaflet map,
+from https://stackoverflow.com/questions/52112119/center-leaflet-in-a-rmarkdown-document */
+.html-widget {
+margin: auto;
+position: sticky;
+margin-top: 2cm;
+margin-bottom: 2cm;
+}
+.leaflet.html-widget.html-widget-static-bound.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom {
+position: sticky;
+width: 100%;
+}
+pre.sourceCode.r {
+background-color: #dddddd40;
+border-radius: 4mm;
+padding: 4mm;
+width: 75%;
+margin: auto;
+margin-top: 1em;
+margin-bottom: 1em;
+/* align-items: center; */
+}
+code.sourceCode.r{
+background-color: transparent;
+font-size: 20pt;
+border-radius: 2mm;
+}
+code {
+font-size: 25pt;
+font-family: monospace;
+background-color: #205D4E24;
+color: #6d4765;
+padding: 1.2mm;
+line-height: 1;
+border-radius: 2mm;
+}
+caption {
+margin-bottom: 10px;
+font-size: 20pt;
+font-style: italic;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #205D4E20;
+}
+.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  border-spacing: 0;
+  font-size: 40%;
+  border-style: none;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-right: 1em;
+  padding-left: 1em;
+  line-height: 1em;
+}
+table {
+  margin: auto;
+}
+th {
+  padding-left: 5mm;
+  padding-right: 5mm;
+}
+.caption {
+font-size: 20pt;
+font-style: italic;
+padding-top: 0;
+}
+.references {
+font-size: 18pt;
+line-height: 90%;
+}
+/* Create three unequal columns that floats next to each other */
+.column {
+float: left;
+padding: 0px;
+}
+.outer {
+width: 33.1in;
+height: calc(46.8in *  (1 - 0.1 - 2.9e-2 - 0.01) );
+-webkit-column-count: 3; /* Chrome, Safari, Opera */
+-moz-column-count: 3; /* Firefox */
+column-count: 3;
+-webkit-column-fill: auto;
+-moz-column-fill: auto;
+column-fill: auto;
+column-gap: 0;
+padding-left: 0cm;
+padding-right: 0cm;
+/* -webkit-column-rule-width: 50%;
+-moz-column-rule-width: 50%;
+column-rule-width: 50%; */
+-webkit-column-rule-style: none;
+-moz-column-rule-style: none;
+column-rule-style: none;
+-webkit-column-rule-color: black;
+-moz-column-rule-color: black;
+column-rule-color: black;
+background-color: #ffffff;
+font-family: Rasa;
+margin-top: calc(46.8in *  0.1 );
+padding-top: 1em;
+padding-bottom: 1em;
+}
+span.citation {
+  color: #205D4E;
+  font-weight: bold;
+}
+a {
+text-decoration: none;
+color: #205D4E;
+}
+#title {
+font-size: 66pt;
+text-align: left;
+margin: 0;
+line-height: 98%;
+border-bottom: 0;
+font-weight: normal;
+background: 0;
+}
+#author {
+color: #6d4765;
+margin: 0;
+line-height: 85%;
+font-size: 39pt;
+}
+#affiliation {
+padding-top: 0.1em;
+color: #00000080;
+font-style: italic;
+font-size: 25pt;
+margin: 0;
+}
+sup {
+color: #B8A6B4;
+}
+.affiliation sup {
+font-size: 20px;
+}
+.author {
+text-align: left;
+}
+.author sup {
+font-size: 30px;
+}
+.author_extra {
+color: #205D4E;
+margin: 0;
+line-height: 85%;
+font-size: 36pt;
+text-align: left;
+}
+.outer h1, h2, h3, h4, h5, h6 {
+text-align: center;
+margin: 0;
+font-weight: bold;
+}
+.section h1 {
+  text-align:center;
+  padding-bottom:5px;
+  background:
+    linear-gradient(
+      to left,
+      #ffffff 1%,
+      #ffffff 20%,
+      #6d476575 33%,
+      #6d4765 50%,
+      #6d476575 66%,
+      #ffffff 80%,
+      #ffffff 99%
+    )
+    left
+    bottom
+    #ffffff
+    no-repeat;
+  background-size:100% 5px ;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+.outer h2 {
+text-align: center;
+}
+.outer p, .level2 {
+color: #000000;
+}
+.outer ol {
+padding-left: 8%;
+padding-right: 8%;
+text-align: left;
+}
+.main {
+width: 33.1in;
+height: calc(46.8in * 0.1);
+position: absolute;
+background-color: #6d4765;
+color: #FFFFFF90;
+font-family: NimbusSanCond;
+background-image: linear-gradient(#6d4765 50%,#205D4E);
+}
+.main strong {
+color: #FFFFFF;
+}
+.main strong > sup {
+color: #FFFFFF;
+}
+.main sup {
+color: #FFFFFF90;
+}
+#main-img-left {
+width: 10%;
+left: 0.5in;
+bottom: 0.2in;
+position: absolute;
+}
+#main-img-center {
+width: 10%;
+left: calc(33.1in * 0.45);
+bottom: 0.5in;
+position: absolute;
+}
+#main-img-right {
+width: 10%;
+right: 0.5in;
+bottom: 0.2in;
+position: absolute;
+}
+.main p {
+font-size: 80pt;
+font-family: NimbusSanCond;
+text-align: center;
+margin: 0;
+position: absolute;
+top: 50%;
+-ms-transform: translateY(-50%);
+transform: translateY(-50%);
+margin-left: 1em;
+}
+.fab {
+color: #00000030;
+font-size: 25px;
+}
+.twitter, i {
+color: #00000030;
+font-size: 35px;
+text-decoration: none;
+}
+a.email {
+text-decoration: none;
+color: #00000030;
+font-size: 35px;
+}
+.envelope {
+color: #00000030;
+font-size: 5px;
+text-decoration: none;
+}
+.poster_wrap {
+width: 33.1in;
+height: 46.8in;
+padding: 0cm;
+}
+.main_bottom {
+width: 33.1in;
+height: calc(46.8in * 2.9e-2);
+margin-top: calc(46.8in * (1 - 2.9e-2));
+position: absolute;
+background-color: #6d4765;
+background-image: linear-gradient(#205D4E 10%, #6d4765);
+}
+.section {
+  padding-left: 10mm;
+  padding-right: 10mm;
+}
+span > #tab:mytable {
+  font-weight: bold;
+}
+.orcid img {
+  width: 3%;
+}
+.emphasis {
+  background-color: #008080;
+  color: #ffffff;
+  border: solid #0b2045 3mm;
+  margin: 1em;
+  padding-left: 0;
+  padding-right: 0;
+}
+.emphasis h1 {
+  font-weight: bold;
+  background: none;
+  background-color: #0b2045;
+  padding-bottom: 5mm;
+  padding-top: 1mm;
+  margin-top: -1mm;
+  margin-right: -1mm;
+  margin-left: -1mm;
+}
+.emphasis blockquote {
+  border: 0;
+}
+.emphasis ol {
+  padding: 0;
+  padding-left: 8%;
+  font-size: 100%;
+  font-weight: bold;
+}
+.emphasis p {
+  color: #ffffff;
+}
+</style>
+</head>
+<body>
+
+
+<div class="poster_wrap">
+
+<div class="column outer">
+<div class="section">
+
+<h3 id="author" class="author">
+
+<strong>Georgina Fuentes-Páez</strong><sup> 1</sup><br>
+<a class="twitter" href="https://mobile.twitter.com/Pasquali_Lab"><i class="fab fa-twitter"></i>&nbsp;&nbsp;@Pasquali_Lab</a><br>
+
+<a class='envelope'><i class="fas fa-envelope"></i></a> <a href="mailto:georgina.fuentes@upf.edu" class="email">georgina.fuentes@upf.edu</a> <br>
+   </h3>
+
+<h5 id="author_extra", class="author_extra">
+ Nacho Molina<sup>2</sup>
+ Mireia Ramos-Rodríguez<sup>1</sup>
+ Lorenzo Pasquali<sup>1</sup>
+</h5>
+
+
+<p id="affiliation" class="affiliation">
+<sup>1</sup> Endocrine Regulatory Genomics, Department of Experimental &amp; Health Sciences, University Pompeu Fabra, 08003, Barcelona, Spain.<br> <sup>2</sup> Institut de génétique et de biologie moléculaire et cellulaire (IGBMC), University of Strasbourg, 67404, Illkirch, France
+</p>
+</div>
+
+<hr />
+<style>
+  #main-img-left, #main-img-center, #main-img-right {
+    width: 27%;
+  }
+  #main-img-left {
+    width: 20%;
+  }
+  /* Headers */
+  h1{
+    font-size: 42pt;
+  }
+  h2,h3,h4,h5,h6{
+    font-size: 32pt;
+  }
+</style>
+<style type="text/css">
+.table caption {
+    font-size: 24pt
+}
+</style>
+<div id="overview" class="section level1">
+<h1>Overview</h1>
+<p>SPICEY (SPecificity Index for Coding and Epigenetic activitY) is an R package designed to quantify cell-type specificity across single cell multi-omic data.</p>
+</div>
+<div id="methods" class="section level1">
+<h1>Methods</h1>
+<div id="cell-type-specificity-indices" class="section level2">
+<h2>Cell type specificity indices</h2>
+<ul>
+<li><strong>RETSI</strong> (Regulatory Element Tissue Specificity Index): quantifies cell-type specificity of regulatory regions across cell types.</li>
+<li><strong>GETSI</strong> (Gene Expression Tissue Specificity Index): measures cell-type specificity of gene expression patterns across cell types.</li>
+</ul>
+<p>Both are calculated using a weighted specificity score for each feature (regulatory region or gene), reflecting the level of enrichment in each cell type, as follows:</p>
+<p><span class="math display">\[
+TSI_{i,x} = \frac{FC_{i,x}}{\max(FC)_x} \cdot w_{i,x}
+\]</span></p>
+<p><span class="math display">\[
+w_{i,x} = \text{rescale}\left( -\log_{10}(padj_{i,x}),\ [0, 1] \right)
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(i\)</span> = cell type</li>
+<li><span class="math inline">\(x \in \{r, g\}\)</span>, with <span class="math inline">\(r\)</span> for regulatory region (RETSI) and <span class="math inline">\(g\)</span> for gene (GETSI)</li>
+<li><span class="math inline">\(\text{FC}_{i,x}\)</span> = log fold-change of feature <span class="math inline">\(x\)</span> in cell type <span class="math inline">\(i\)</span></li>
+</ul>
+<p>To facilitate the construction of cell-type specific regulatory networks, SPICEY associates regulatory elements with their likely target genes by either:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Nearest-gene assignment:</strong> based on proximity to the closest transcription start site (TSS).</li>
+<li><strong>Co-accessibility-based linking:</strong> leveraging co-accessible links in chromatin accessibility (e.g., via Cicero).</li>
+</ol>
+</div>
+<div id="entropy-based-specificity-indices" class="section level2">
+<h2>Entropy-based Specificity Indices</h2>
+<p>SPICEY alternatively uses an entropy-based approach to measure the distributional skewness of feature activity across cell types, as follows:</p>
+<p><span class="math display">\[
+H = - \sum_{i=1}^{N} p_i \log_2(p_i)
+\]</span></p>
+<p><span class="math display">\[
+H_{norm} = 1 - e^{H}
+\]</span>
+where:</p>
+<ul>
+<li><span class="math inline">\(i\)</span> = cell type</li>
+<li><span class="math inline">\(p_{i,x} = \frac{a_{i,x}}{\sum_{j=1}^{N} a_{j,x}}\)</span> = activity or expression of feature <span class="math inline">\(x\)</span> across <span class="math inline">\(N\)</span> cell types</li>
+<li><span class="math inline">\(H_norm\)</span> = normalized shannon entropy [0,1].</li>
+</ul>
+<p>Feature activity or expression is normalized across cell types to follow a probability distribution; low entropy means specific to few cell types, high entropy means spread out evenly.</p>
+</div>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<p>SPICEY was applied to single-nucleus ATAC-seq and RNA-seq data from 5 non-diabetic human pancreatic islets from the Human Pancreas Analysis Program (HPAP) (<span class="citation">@ref</span>) (<strong>Figure</strong> <a href="#fig:suplementary1">1</a>) to quantify cell-type specificity, and co-accessibility links were used to assign distal regulatory elements to genes. Distribution values of the SPICEY scores revealed distinct specificity patterns across cell types (<strong>Figure</strong> <a href="#fig:main1">2</a>), reflecting heterogeneous regulatory and transcriptional landscapes within the pancreatic islets.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:suplementary1"></span>
+<img src="figs/HPAP_UMAP_subset.png" alt="Joint UMAP visualization of cell types in human pancreatic tissue derived from single-cell data. The UMAP uses weighted nearest neighbor (WNN) integration of RNA and chromatin accessibility (ATAC) profiles from a subset of 5 non-diabetic HPAP donors with comparable cell numbers and cell type distributions. Each point represents a nucleus and is colored by predicted cell type." width="95%" />
+<p class="caption">
+Figure 1: <em>Joint UMAP visualization of cell types in human pancreatic tissue derived from single-cell data</em>. The UMAP uses weighted nearest neighbor (WNN) integration of RNA and chromatin accessibility (ATAC) profiles from a subset of 5 non-diabetic HPAP donors with comparable cell numbers and cell type distributions. Each point represents a nucleus and is colored by predicted cell type.
+</p>
+</div>
+
+<p>SPICEY scores for promoters and enhancers linked to known ubiquitous and tissue-specific genes showed that tissue-specific sites have significantly higher specificity, indicating that cell-type-specific gene expression aligns with cell-specific regulatory activity. This demonstrates SPICEY’s ability to capture regulatory and transcriptional specificity in human pancreatic islets (<strong>Figure</strong> <a href="#fig:main1">2</a>).</p>
+<p>Additionally, entropy measures revealed that ubiquitous sites had higher entropy, indicating broad activity across cell types while tissue-specific sites showed significantly lower entropy (p &lt; 0.001), reflecting more restricted cell-type-specific activity (<strong>Figure</strong> <a href="#fig:main1">2</a>). This demonstrates that SPICEY’s entropy metric reliably captures cell-type specificity.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:main1"></span>
+<img src="POSTER_EUROBIOC_20250805_files/figure-html/main1-1.png" alt="SPICEY scores capture cell-type-specific regulatory patterns. (A) SPICEY score distributions highlight higher specificity in tissue-specific genes/elements (brown) compared to ubiquitous ones (green). (B–C) Promoter and distal regions show significantly elevated SPICEY scores for tissue-specific genes. (D–E) Entropy analyses reveal lower entropy for tissue-specific features, confirming stronger cell-type restriction, especially in RETSI scores stratified by region." width="100%" />
+<p class="caption">
+Figure 2: <em>SPICEY scores capture cell-type-specific regulatory patterns.</em> (A) SPICEY score distributions highlight higher specificity in tissue-specific genes/elements (brown) compared to ubiquitous ones (green). (B–C) Promoter and distal regions show significantly elevated SPICEY scores for tissue-specific genes. (D–E) Entropy analyses reveal lower entropy for tissue-specific features, confirming stronger cell-type restriction, especially in RETSI scores stratified by region.
+</p>
+</div>
+
+<p>In endocrine cells, SPICEY identified key known markers like <em>INS</em> and <em>IGF2</em> (beta), <em>SST</em> (delta), and <em>IRX1/IRX2</em> (alpha), along with less common ones like <em>ADCYAP1</em> and <em>SIX”</em> (beta) and <em>LRFN5</em> (delta). Although <em>GCG</em> wasn’t top-ranked in alpha cells, its high raw specificity supported its relevance. In non-endocrine cells, SPICEY recovered established markers <em>REG1A/B</em> (acinar), <em>PI3</em> and <em>KRT family</em> (ductal) and <em>COL6A1</em> (stellate) and highlighted novel candidates like <em>GIMAP</em> genes in endothelial cells (<strong>Figure</strong> <a href="#main2"><strong>??</strong></a>).</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:main2"></span>
+<img src="POSTER_EUROBIOC_20250805_files/figure-html/main2-1.png" alt="Heatmap of top cell-type-specific genes based on SPICEY scores. This heatmap shows the top 5 genes per cell type ranked by RETSI and GETSI z-scores. Each row is a gene, and each column represents a different cell type. Darker colors indicate higher specificity, meaning stronger chromatin accessibility or gene expression unique to that cell type." width="100%" />
+<p class="caption">
+Figure 3: <em>Heatmap of top cell-type-specific genes based on SPICEY scores.</em> This heatmap shows the top 5 genes per cell type ranked by RETSI and GETSI z-scores. Each row is a gene, and each column represents a different cell type. Darker colors indicate higher specificity, meaning stronger chromatin accessibility or gene expression unique to that cell type.
+</p>
+</div>
+
+</div>
+<div id="conclusions" class="section level1">
+<h1>Conclusions</h1>
+<ul>
+<li><p>SPICEY is an R package for quantifying cell-type specificity from single-cell multi-omic data. It combines differential analysis with entropy-based scoring through two integrated metrics.</p></li>
+<li><p>Detects both known and novel markers in well-defined and less-characterized endocrine and non-endocrine cell types, and distinguishes tissue-specific from broadly active features.</p></li>
+<li><p>By leveraging co-accessibility to link distal regulatory elements to target genes, SPICEY facilitates the identification of coordinated regulatory programs.</p></li>
+<li><p>SPICEY provides a versatile framework for integrating single-cell multi-omic data, ideal for studying regulatory specificity in complex tissues using common single-cell analysis pipelines.</p></li>
+</ul>
+</div>
+
+</div>
+<div class="main">
+<p><img src="figs/logo_spicey.png" style="width:5.0%" /><br><br> <strong>SPICEY: An R package for assessing tissue specificity from single cell multi-omics data</strong></p>
+</div>
+<div class="main_bottom">
+<img id="main-img-left" src=>
+<img id="main-img-center" src=>
+<img id="main-img-right" src=Figures/funding2.svg>
+</div>
+</div>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+var script = document.createElement("script");
+script.type = "text/javascript";
+var src = "true";
+if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+if (location.protocol !== "file:" && /^https?:/.test(src))
+src = src.replace(/^https?:/, '');
+script.src = src;
+document.getElementsByTagName("head")[0].appendChild(script);
+})();
+</script>
+
+
+</body>
+</html>

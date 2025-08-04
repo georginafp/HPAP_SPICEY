@@ -928,7 +928,7 @@ r_entropy <- cowplot::plot_grid(entropy_prom, entropy_distal,
 entropy_final <- cowplot::plot_grid(g_entropy, 
                                     r_entropy, 
                                     label_size = 12, 
-                                    rel_widths = c(.6, 1)
+                                    rel_widths = c(.6, 1))
 
 ```
 
@@ -937,27 +937,13 @@ entropy_final <- cowplot::plot_grid(g_entropy,
 
 ```{r final-figure, message=FALSE, warning=FALSE, fig.width=5, fig.height=9}
 
-## Combine plots
-# bottom_row <- cowplot::plot_grid(prom, enh,
-#                                  labels = c("B", "C"),
-#                                  label_size = 12,
-#                                  ncol = 2)
-
-# Make a narrower entropy plot by putting it in a row with a spacer
-entropy_row <- cowplot::plot_grid(
-  entropy, NULL, NULL,
-  rel_widths = c(0.9, 0.3, 0.3),  # Center the entropy plot
-  nrow = 1
-)
-
 # Now combine all three rows
 final_plot <- cowplot::plot_grid(
   distribution,
   final,
   entropy_final,
   nrow = 3,
-  rel_heights = c(1, 1, 1.2)  # Slightly less vertical height for the entropy row
-)
+  rel_heights = c(1, 1, 1.2))
 
 ggsave(paste0(here::here("/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/figs"), "/FINAL_FIGURE.png"),
        plot = final_plot, width = 5, height = 9, units = "in", dpi = 300)
