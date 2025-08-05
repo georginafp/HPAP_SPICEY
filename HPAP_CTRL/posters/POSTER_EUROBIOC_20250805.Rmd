@@ -1,14 +1,13 @@
 ---
 poster_width: "33.1in"
 poster_height: "46.8in"
-main_topsize: 0.1 #percent coverage of the poster
+main_topsize: 0.2 #percent coverage of the poster
 main_bottomsize: 0.029
 author:
   - name: '**Georgina Fuentes-Páez**'
     affil: 1
     main: true
-    # orcid: '0000-0002-1099-3857'
-    twitter: Pasquali_Lab
+    orcid: '0009-0003-9417-7148'
     email: georgina.fuentes@upf.edu
   - name: Nacho Molina
     affil: 2
@@ -24,41 +23,40 @@ affiliation:
 theme: default
 #STYLE & FORMATTING
 title_textsize: "66pt"
-author_textsize: "39pt"
-authorextra_textsize: "36pt"
-affiliation_textsize: "25pt"
-affiliation_textcol: '#00000080'
-caption_fontsize: "25pt"
+author_textsize: "42pt"
+authorextra_textsize: "30pt"
+affiliation_textsize: "21pt"
+affiliation_textcol: '##2c2022'
+caption_fontsize: "21pt"
 #Middle of the poster
-main_fontfamily: "NimbusSanCond"
-main_textcol: "#FFFFFF"
+main_fontfamily: "Lato"
+main_textcol: "##2c2022"
 main_textaplha: 100
 main_textsize: "80pt"
+font_family: "Lato"
 main_findings:
-  - "![](figs/logo_spicey.png){ width=2.5% }"
-  - "**SPICEY: An R package for assessing tissue specificity from single cell multi-omics data**"
-# logoleft_name: Figures/DEPT.CESt_blanc_heng.png
-# logoleft_width: "0.05%" # Significantly reduced the size
-# logoright_width: "0.05%" # Significantly reduced the size
-# logocenter_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/qr-code-black.png
+- "![](figs/TITLE_brown.svg){ width=200% }"
+logoleft_name: figs/DEPT.CESt_blanc_heng.png
+logoright_width: "0.05%" # Significantly reduced the size
+logocenter_width: "0.05%" # Significantly reduced the size
+# logocenter_name: figs/QR_SPICEY_GITHUB2.png
 #---POSTER BODY OPTIONS---#
-primary_colour: "#6d4765" #Main colour used for poster design.
-accent_colour: "#B8A6B4" #Secondary colour use for poster design.
-secondary_colour: "#205D4E" #A third colour option for adding some "pop" to the poster colour palette
-body_bgcol: "#ffffff"
+primary_colour: "#d4cbcc" #Main colour used for poster design.
+accent_colour: "#ebe7e7" #Secondary colour use for poster design.
+secondary_colour: "#f7f5f5" #A third colour option for adding some "pop" to the poster colour palette
+body_bgcol: "#FFFFFF"
 body_textsize: "28pt"
-body_textcol: "#000000"
+body_fontfamily: "Lato"
+body_textcol: "##2c2022"
 reference_textsize: "18pt"
 output: 
   posterdown::posterdown_betterport:
     self_contained: false
     pandoc_args: --mathjax
     number_sections: false
-logoright_name: "Figures/funding2.svg"
+logoright_name: figs/funding_ministerio.png
 logoright_position: "top"
 ---
-
-------------------------------------------------------------------------
 
 ```{r setup, include=FALSE}
 
@@ -129,9 +127,10 @@ cell_colors <- c("Alpha" = "#008E80",
 
 ```
 
+```{=html}
 <style>
   #main-img-left, #main-img-center, #main-img-right {
-    width: 27%;
+    width: 10%;
   }
   #main-img-left {
     width: 20%;
@@ -144,6 +143,7 @@ cell_colors <- c("Alpha" = "#008E80",
     font-size: 32pt;
   }
 </style>
+```
 
 ```{css, echo=FALSE}
 .table caption {
@@ -153,9 +153,7 @@ cell_colors <- c("Alpha" = "#008E80",
 
 # Overview
 
-SPICEY (SPecificity Index for Coding and Epigenetic activitY) is an R package designed to quantify cell-type specificity across single cell multi-omic data.
-
-# Methods
+SPICEY (SPecificity Index for Coding and Epigenetic activitY) is an R package designed to quantify cell-type specificity from single cell multi-omic data.
 
 ## Cell type specificity indices
 
@@ -175,12 +173,12 @@ $$
 where:
 
 -   $i$ = cell type
--   $x \in \{r, g\}$, with $r$ for regulatory region (RETSI) and $g$ for gene (GETSI)
--   $\text{FC}_{i,x}$ = log fold-change of feature $x$ in cell type $i$
+-   $x \in \{r, g\}$, with $r$ = regulatory region (RETSI); $g$ = gene (GETSI)
+-   $\text{FC}_{i,x}$ = fold-change of feature $x$ in cell type $i$
 
 ## Entropy-based specificity Indices
 
-To measure the distributional skewness of feature activity across cell types:
+To measure the distributional skewness of feature activity/expression across cell types:
 
 $$
 H = - \sum_{i=1}^{N} p_i \log_2(p_i)
@@ -192,7 +190,7 @@ $$ where:
 
 -   $i$ = cell type
 -   $p_{i,x} = \frac{a_{i,x}}{\sum_{j=1}^{N} a_{j,x}}$ = activity or expression of feature $x$ across $N$ cell types
--   $H_norm$ = normalized shannon entropy [0,1].
+-   $H_{norm}$ = normalized shannon entropy [0,1].
 
 Feature activity or expression is normalized across cell types to follow a probability distribution; low entropy means specific to few cell types, high entropy means spread out evenly.
 
@@ -200,16 +198,15 @@ Feature activity or expression is normalized across cell types to follow a proba
 
 Using (1) either **nearest-gene** (based on proximity to the closest TSS) or (2) **co-accessibility** (using correlated chromatin accessibility) to help construct tissue-specific gene-regulatory networks.
 
-
 # Results
 
-SPICEY scores from 5 non-diabetic human pancreatic islets (HPAP) (**Figure** \@ref(fig:suplementary1)) revealed distinct specificity patterns across cell types, highlighting the heterogeneous regulatory and transcriptional landscape of the pancreatic islets (**Figure** \@ref(fig:main1)).
+SPICEY scores from non-diabetic human pancreatic islets (HPAP) (**Figure** \@ref(fig:suplementary1)) revealed distinct specificity patterns across cell types, highlighting the heterogeneous regulatory and transcriptional landscape of the pancreatic islets (**Figure** \@ref(fig:main1)).
 
-```{r suplementary1, fig.align='center', fig.cap="(ref:suplementary1)", fig.show='hold', message=FALSE, warning=FALSE, out.width="90%", out.height="90%"}
+```{r suplementary1, fig.align='center', fig.cap="(ref:suplementary1)", fig.show='hold', message=FALSE, warning=FALSE, out.width="80%", out.height="80%"}
 knitr::include_graphics("/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/posters/figs/HPAP_UMAP_subset.png")
 ```
 
-(ref:suplementary1) *Joint snATAC and RNA UMAP of human pancreatic islet cell types* from 5 non-diabetic HPAP donors. Each point represents a nucleus and is colored by predicted cell type.
+(ref:suplementary1) *Joint snATAC and scRNA UMAP of human pancreatic islet cell types* from 5 non-diabetic HPAP donors. Each point represents a nucleus and is colored by predicted cell type.
 
 Tissue-specific promoters and enhancers have higher specificity than ubiquitous ones, showing that cell-type-specific gene expression aligns with cell-specific cis-regulatory activity.  (**Figure** \@ref(fig:main1)). Ubiquitous sites have higher entropy -indicating widespread activity- while tissue-specific sites have significantly lower entropy -reflecting a bias towards cell-type-specific activity- (**Figure** \@ref(fig:main1)), confirming that SPICEY effectively captures regulatory and transcriptional specificity in human pancreatic islets.
 
@@ -471,7 +468,7 @@ entropy_genes <- bind_rows(
   geom_violin() +
   geom_boxplot(alpha = 0.4) +  # Adjust outlier behavior if needed
   theme_gray() +
-  labs(x = "", y = "Entropy") +
+  labs(x = "", y = expression(H[norm]~"GETSI")) +
   theme(
     legend.position = "none",
     ggside.panel.scale.x = 0.3,
@@ -538,7 +535,7 @@ entropy_prom <- bind_rows(
   geom_violin() +
   geom_boxplot(alpha = 0.4) +  # Adjust outlier behavior if needed
   theme_gray() +
-  labs(x = "", y = "Entropy") +
+  labs(x = "", y = expression(H[norm]~"RETSI")) +
   theme(
     legend.position = "none",
     ggside.panel.scale.x = 0.3,
@@ -601,7 +598,7 @@ entropy_distal <- bind_rows(
   geom_violin() +
   geom_boxplot(alpha = 0.4) +  # Adjust outlier behavior if needed
   theme_gray() +
-  labs(x = "", y = "Entropy") +
+  labs(x = "", y = "") +
   theme(
     legend.position = "none",
     ggside.panel.scale.x = 0.3,
@@ -632,11 +629,13 @@ r_entropy <- cowplot::plot_grid(entropy_prom, entropy_distal,
                                 labels = c("E"),
                                 label_size = 12)
 
-entropy_final <- cowplot::plot_grid(g_entropy, 
-                                    r_entropy, 
-                                    label_size = 12, 
-                                    rel_widths = c(.6, 1))
-
+entropy_final <- cowplot::plot_grid(
+  g_entropy, r_entropy,
+  label_size = 12,
+  rel_widths = c(0.57, 1),
+  align = "h",
+  axis = "tb"
+)
 
 # FINAL FIGURE ----
 cowplot::plot_grid(
@@ -644,7 +643,7 @@ cowplot::plot_grid(
   final,
   entropy_final,
   nrow = 3,
-  rel_heights = c(1, 1, 1.2))
+  rel_heights = c(1, 1, 1.1))
 
 ```
 
