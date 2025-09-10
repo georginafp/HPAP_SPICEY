@@ -1,7 +1,7 @@
 ---
 poster_width: "37.40in"
 poster_height: "73.23in"
-main_topsize: 0.2
+main_topsize: 0.15
 main_bottomsize: 0.04
 # title: '**SPICEY: An R package for assessing tissue specificity from single cell multi-omics data**'
 author:
@@ -9,7 +9,7 @@ author:
     affil: 1
     main: true
     orcid: '0009-0003-9417-7148'
-    email: georgina.fuentes@upf.edu
+    email: '<span style="font-size:35pt;">georgina.fuentes@upf.edu</span>'
   - name: Nacho Molina
     affil: 2
   - name: Mireia Ramos-Rodríguez
@@ -26,22 +26,22 @@ affiliation:
 theme: default
 
 # --- STYLE & FORMATTING --- #
-title_textsize: "72pt"
-author_textsize: "52pt"
-authorextra_textsize: "42pt"
-affiliation_textsize: "32pt"
+title_textsize: "75pt"
+author_textsize: "65pt"
+authorextra_textsize: "45pt"
+affiliation_textsize: "35pt"
 affiliation_textcol: '#00000080'
-caption_fontsize: "32pt"
+caption_fontsize: "35pt"
 
 main_fontfamily: "Lato"
 main_textcol: "#FFFFFF"
-main_textsize: "82pt"
+main_textsize: "85pt"
 main_textalpha: 100
 font_family: "Lato"
 
 # --- POSTER CONTENT --- #
 main_findings:
-  - "![](figs/main_spicey_white.png){ width=85% }"
+  - "![](figs/main_spicey_white.png){ width=90% }"
 
 # --- LOGOS --- #
 logoleft_name: figs/UPF.png
@@ -55,14 +55,14 @@ logocenter_name: figs/STBG_LACAIXA.png
 # logocenter_width: "%" # Significantly reduced the size
 
 # --- COLOURS --- #
-primary_colour: "#55345e"       # Main background
-accent_colour: "#49817b"        # Highlighted sections
-secondary_colour: "#326771"     # Contrast/pop elements
+primary_colour: "#684548"       # Main background
+accent_colour: "#926164"        # Highlighted sections
+secondary_colour: "#3a4d34"     # Contrast/pop elements
 body_bgcol: "#ffffff"
-body_textsize: "35pt"
+body_textsize: "40pt"
 body_fontfamily: "Lato"
 body_textcol: "#000000"
-reference_textsize: "32pt"
+reference_textsize: "35pt"
 
 # --- OUTPUT OPTIONS --- #
 output: 
@@ -71,7 +71,8 @@ output:
     pandoc_args: --mathjax
     number_sections: false
 
-bibliography: poster_lib.bib
+bibliography: POSTER_SPICEY.bib
+csl: bioinformatics.csl
 ---
 
 ```{r setup, include=FALSE}
@@ -147,7 +148,11 @@ cell_colors <- c("Alpha" = "#008E80",
 
 ```{css, echo=FALSE}
 .table caption {
-    font-size: 30pt
+    font-size: 35pt
+}
+
+.spacer {
+  margin-bottom: 10px;
 }
 ```
 
@@ -166,7 +171,7 @@ cell_colors <- c("Alpha" = "#008E80",
 
   #main-img-center {
     width: 37%;
-   margin-left: -23%; /* shift left */
+    margin-left: -23%; /* shift left */
   }
 
   #main-img-right {
@@ -175,16 +180,19 @@ cell_colors <- c("Alpha" = "#008E80",
 
   /* Headers */
   h1 {
-    font-size: 45pt;
+    font-size: 67pt;
   }
   h2,h3,h4,h5,h6 {
-    font-size: 36pt;
+    font-size: 55pt;
   }
 
   /* Change space between figure and captions */
   p.caption {
     margin-top: 0;
-    margin-bottom: 0;
+    margin-bottom: 20;
+    font-size: 35pt; /*  increase figure caption font size */
+    color: #505050;  /* optional, to make it stand out */
+    text-align: center; /* optional */
   }
 </style>
 ```
@@ -193,12 +201,15 @@ cell_colors <- c("Alpha" = "#008E80",
 table { caption-side: bottom }
 ```
 
+<div style="height:60px;"></div>
 
 # Background
 
-Single-cell RNA and ATAC sequencing allow high-resolution profiling of gene expression and chromatin accessibility, revealing cell-type-specific regulatory programs. Yet, tools to quantify specificity across multiple cell types are still limited @lim_advances_2024.
+Single-cell RNA and ATAC sequencing allow high-resolution profiling of gene expression and chromatin accessibility, revealing cell-type-specific regulatory programs. Yet, tools to quantify specificity across multiple cell types are still limited [@lim_advances_2024].
 
 **SPICEY** (**SP**ecificity **I**ndex for **C**oding and **E**pigenetic activit**Y**) is the first R package to quantify cell-type specificity from single-cell multi-omic data, offering an intuitive pipeline for analyzing and visualizing transcriptomic and epigenomic specificity.
+
+<div style="height:30px;"></div>
 
 # Methods
 
@@ -210,6 +221,7 @@ knitr::include_graphics("/homes/users/gfuentes/scratch/projects/spicey_paper/HPA
 
 (ref:workflow) *SPICEY workflow*. Differential single-cell RNA/ATAC data and region–gene annotations are used to compute specificity and entropy metrics, enabling the construction of tissue-specific regulatory networks.
 
+<div style="height:20px;"></div>
 
 ## Cell type specificity indices
 
@@ -250,11 +262,13 @@ $$ where:
 
 Feature activity or expression is normalized across cell types to form a probability distribution, where low entropy indicates specificity to a few cell types, and high entropy reflects broad, uniform activity.
 
-<br>
+<div style="height:20px;"></div>
 
 ## Region-to-gene annotation
 
 To help construct tissue-specific gene-regulatory networks, SPICEY optionally annotates regulatory regions to their putative target genes using (1) **nearest-gene** (based on proximity to the closest TSS), or (2) **co-accessibility** (using correlated chromatin accessibility).
+
+<div style="height:30px;"></div>
 
 # Results
 
@@ -304,7 +318,7 @@ knitr::include_graphics("/homes/users/gfuentes/scratch/projects/spicey_paper/HPA
 
 ```
 
-SPICEY scores from non-diabetic human pancreatic islets (HPAP) @authors_p_h_pancdb_2022 showed distinct specificity patterns across cell types, highlighting the heterogeneous regulatory and transcriptional landscape of the pancreatic islets (**Figure** \@ref(fig:dist)). 
+SPICEY scores from non-diabetic human pancreatic islets (HPAP) [@authors_p_h_pancdb_2022];[@kaestner_nih_2019];[@fasolino_single-cell_2022] showed distinct specificity patterns across cell types, highlighting the heterogeneous regulatory and transcriptional landscape of the pancreatic islets (**Figure** \@ref(fig:dist)).
 
 ```{r dist, message=FALSE, warning=FALSE, fig.show="hold", echo=FALSE, fig.cap="(ref:dist)", fig.width=6, fig.height=4}
 
@@ -396,7 +410,7 @@ distribution
 
 (ref:dist) Distribution values reflect higher specificity in tissue-specific features (brown) compared to ubiquitous (green)
 
-Known tissue-specific promoters and enhancers have higher specificity than ubiquitous ones. Thus, SPICEY captures how cell-type-specific gene expression aligns with cell-specific cis-regulatory activity.  (**Figure** \@ref(fig:markers)). 
+Known tissue-specific promoters and enhancers have higher specificity than ubiquitous ones. Thus, SPICEY captures how cell-type-specific gene expression aligns with cell-specific cis-regulatory activity. (**Figure** \@ref(fig:markers)).
 
 ```{r markers, message=FALSE, warning=FALSE, fig.show="hold", echo=FALSE, fig.cap="(ref:markers)", fig.width=6, fig.height=4}
 
@@ -441,16 +455,16 @@ prom <- bind_rows(
   ggside::scale_xsidey_discrete() +
   scale_y_continuous(name = "Density") +
   scale_color_manual(values = c(
-    "Ubiquitous_RETSI" = "#516c3d",
-    "Ubiquitous_GETSI" = "#66884d",
-    "Tissue-specific_RETSI" = "#966f72",
-    "Tissue-specific_GETSI" = "#bc8b8f"
+    "Ubiquitous_RETSI" = "#516c48",
+    "Ubiquitous_GETSI" = "#516c48",
+    "Tissue-specific_RETSI" = "#926164",
+    "Tissue-specific_GETSI" = "#926164"
   )) +
   scale_fill_manual(values = c(
-    "Ubiquitous_RETSI" = "#516c3d",
-    "Ubiquitous_GETSI" = "#66884d",
-    "Tissue-specific_RETSI" = "#966f72",
-    "Tissue-specific_GETSI" = "#bc8b8f"
+    "Ubiquitous_RETSI" = "#8da17f",
+    "Ubiquitous_GETSI" = "#8da17f",
+    "Tissue-specific_RETSI" = "#bd9c9e",
+    "Tissue-specific_GETSI" = "#bd9c9e"
   )) +
   labs(x = "SPICEY measure") +
   theme_gray() +
@@ -507,18 +521,17 @@ enh <- bind_rows(
   ggside::scale_xsidey_discrete() +
   scale_y_continuous(name = "Density") +
   scale_color_manual(values = c(
-    "Ubiquitous_RETSI" = "#516c3d",
-    "Ubiquitous_GETSI" = "#66884d",
-    "Tissue-specific_RETSI" = "#966f72",
-    "Tissue-specific_GETSI" = "#bc8b8f"
+    "Ubiquitous_RETSI" = "#516c48",
+    "Ubiquitous_GETSI" = "#516c48",
+    "Tissue-specific_RETSI" = "#926164",
+    "Tissue-specific_GETSI" = "#926164"
   )) +
   scale_fill_manual(values = c(
-    "Ubiquitous_RETSI" = "#516c3d",
-    "Ubiquitous_GETSI" = "#66884d",
-    "Tissue-specific_RETSI" = "#966f72",
-    "Tissue-specific_GETSI" = "#bc8b8f"
+    "Ubiquitous_RETSI" = "#8da17f",
+    "Ubiquitous_GETSI" = "#8da17f",
+    "Tissue-specific_RETSI" = "#bd9c9e",
+    "Tissue-specific_GETSI" = "#bd9c9e"
   )) +
-  
   labs(x = "SPICEY measure") +
   # ggtitle("Promoter regions") +
   theme_gray() +
@@ -542,7 +555,7 @@ final <- cowplot::plot_grid(prom, enh,
 final
 ```
 
-(ref:markers) Promoter and distal regions show higher SPICEY scores for tissue-specific genes. 
+(ref:markers) Promoter and distal regions show higher SPICEY scores for tissue-specific genes.
 
 Known ubiquitous sites have higher entropy -indicating widespread activity- while tissue-specific sites have significantly lower entropy -reflecting a bias towards cell-type-specific activity- (**Figure** \@ref(fig:entropy)), confirming that SPICEY effectively captures regulatory and transcriptional specificity in human pancreatic islets.
 
@@ -593,8 +606,8 @@ entropy_genes <- bind_rows(
     plot.title = element_text(size = 12)
   ) +
   scale_fill_manual(values = c(
-    "Ubiquitous" = "#5B7A45",
-    "Tissue-specific" = "#a97d80"
+    "Ubiquitous" = "#647c5c",
+    "Tissue-specific" = "#a78083"
   )) +
   # ylim(c(1,1.2))+
   geom_signif(comparisons = list(
@@ -757,18 +770,20 @@ entropy_final
 
 (ref:entropy) Entropy metrics reveal lower values for tissue-specific features, confirming stronger cell-type specificity.
 
+<br>
+
 ## SPICEY uncovers both known and novel markers in human pancreatic islets
 
-SPICEY identified well-known markers in endocrine cells (*INS, IGF2, SST, IRX1/IRX2*) as well as less common ones like *ADCYAP1, SIX2*, and *LRFN5.* 
+SPICEY identified well-known markers in endocrine cells (*INS, IGF2, SST, IRX1/IRX2*) [@hauge-evans_somatostatin_2009] as well as less common ones like *ADCYAP1, SIX2*, and *LRFN5* [@yamamoto_overexpression_2003];[@bevacqua_six2_2021]*;* [@elgamal_integrated_2023]*.*
 
 It recovered established markers such as *REG1A/B, PI3, KRT* family, and *COL6A1*, for non-endocrine cells while also capturing novel potential candidates like *GIMAP* genes in endothelial cells (**Figure** \@ref(fig:main2)).
 
 ```{r main2, message=FALSE, warning=FALSE, fig.show="hold", echo=FALSE, fig.cap="(ref:main2)"}
 
 t <- SPICEY::spicey_heatmap(df = SPICEY_ANNOTATED_COACC$linked, 
-                       spicey_measure = c("SPICEY"), 
-                       combined_zscore = FALSE, 
-                       top_n = 5)
+                            spicey_measure = c("SPICEY"), 
+                            combined_zscore = FALSE, 
+                            top_n = 5)
 
 cowplot::ggdraw() +
   cowplot::draw_plot(t, x = 0, y = 0, width = 1, height = 1) +
@@ -776,17 +791,18 @@ cowplot::ggdraw() +
 
 ```
 
-(ref:main2) *Top SPICEY cell-type-specific features.* The heatmap displays the top 5 genes for each cell type based on RETSI and GETSI z-scores. Rows represent genes and columns represent cell types. Darker colors indicate higher specificity. 
+(ref:main2) *Top SPICEY cell-type-specific features.* The heatmap displays the top 5 genes for each cell type based on RETSI and GETSI z-scores. Rows represent genes and columns represent cell types. Darker colors indicate higher specificity.
+
+<div style="height:30px;"></div>
 
 # Conclusions
 
-* SPICEY is an R package that quantifies cell-type specificity from single-cell multi-omic data using combined differential and entropy-based metrics, ideal for studying complex tissues using common single-cell workflows.
+-   SPICEY is an R package that quantifies cell-type specificity from single-cell multi-omic data using combined differential and entropy-based metrics, ideal for studying complex tissues using common single-cell workflows.
 
-* Identifies both, known and novel markers across well-defined and less-studied cell types, distinguishing tissue-specific from broadly active features.
+-   Identifies both, known and novel markers across well-defined and less-studied cell types, distinguishing tissue-specific from broadly active features.
 
-* Annotates regulatory elements to target genes helping elucidate tissue-specific regulatory networks.
+-   Annotates regulatory elements to target genes helping elucidate tissue-specific regulatory networks.
 
-# References 
+<div style="height:30px;"></div>
 
-[@R-posterdown]
-[@R-rmarkdown]
+# References
