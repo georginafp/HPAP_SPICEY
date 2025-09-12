@@ -41,7 +41,7 @@ font_family: "Lato"
 
 # --- POSTER CONTENT --- #
 main_findings:
-  - "![](figs/main_spicey_white.png){ width=90% }"
+  - "![](figs/main_spicey_white.png){ width=95% }"
 
 # --- LOGOS --- #
 logoleft_name: figs/UPF.png
@@ -55,14 +55,14 @@ logocenter_name: figs/STBG_LACAIXA.png
 # logocenter_width: "%" # Significantly reduced the size
 
 # --- COLOURS --- #
-primary_colour: "#684548"       # Main background
-accent_colour: "#926164"        # Highlighted sections
-secondary_colour: "#3a4d34"     # Contrast/pop elements
+primary_colour: "#926164"       # Main background
+accent_colour: "#59583a"        # Highlighted sections
+secondary_colour: "#3a3a1e"     # Contrast/pop elements
 body_bgcol: "#ffffff"
 body_textsize: "40pt"
 body_fontfamily: "Lato"
 body_textcol: "#000000"
-reference_textsize: "35pt"
+reference_textsize: "30pt"
 
 # --- OUTPUT OPTIONS --- #
 output: 
@@ -180,10 +180,10 @@ cell_colors <- c("Alpha" = "#008E80",
 
   /* Headers */
   h1 {
-    font-size: 67pt;
+    font-size: 62pt;
   }
   h2,h3,h4,h5,h6 {
-    font-size: 55pt;
+    font-size: 50pt;
   }
 
   /* Change space between figure and captions */
@@ -201,7 +201,8 @@ cell_colors <- c("Alpha" = "#008E80",
 table { caption-side: bottom }
 ```
 
-<div style="height:60px;"></div>
+::: {style="height:5px;"}
+:::
 
 # Background
 
@@ -209,19 +210,21 @@ Single-cell RNA and ATAC sequencing allow high-resolution profiling of gene expr
 
 **SPICEY** (**SP**ecificity **I**ndex for **C**oding and **E**pigenetic activit**Y**) is the first R package to quantify cell-type specificity from single-cell multi-omic data, offering an intuitive pipeline for analyzing and visualizing transcriptomic and epigenomic specificity.
 
-<div style="height:30px;"></div>
+::: {style="height:1px;"}
+:::
 
 # Methods
 
 ```{r workflow, fig.align='center', fig.show='hold', message=FALSE, warning=FALSE, out.height="100%", out.width="100%", fig.cap="(ref:workflow)"}
 
-knitr::include_graphics("/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/posters/figs/SPICEY_wf.png")
+knitr::include_graphics("/homes/users/gfuentes/scratch/projects/spicey_paper/HPAP_CTRL/posters/figs/SPICEY_WF_FINAL.png")
 
 ```
 
 (ref:workflow) *SPICEY workflow*. Differential single-cell RNA/ATAC data and region–gene annotations are used to compute specificity and entropy metrics, enabling the construction of tissue-specific regulatory networks.
 
-<div style="height:20px;"></div>
+::: {style="height:5px;"}
+:::
 
 ## Cell type specificity indices
 
@@ -262,13 +265,12 @@ $$ where:
 
 Feature activity or expression is normalized across cell types to form a probability distribution, where low entropy indicates specificity to a few cell types, and high entropy reflects broad, uniform activity.
 
-<div style="height:20px;"></div>
+::: {style="height:5px;"}
+:::
 
 ## Region-to-gene annotation
 
 To help construct tissue-specific gene-regulatory networks, SPICEY optionally annotates regulatory regions to their putative target genes using (1) **nearest-gene** (based on proximity to the closest TSS), or (2) **co-accessibility** (using correlated chromatin accessibility).
-
-<div style="height:30px;"></div>
 
 # Results
 
@@ -379,10 +381,10 @@ distribution <- ggplot(spicey_long, aes(x = cell_type, y = value)) +
     data = .markers %>%
       pivot_longer(cols = c(RETSI, GETSI), names_to = "metric", values_to = "value"),
     aes(x = cell_type, y = value, color = type),
-    size = 2
+    size = 4.5
   ) +
   scale_color_manual(values = c(
-    "Ubiquitous" = "#5B7A45",
+    "Ubiquitous" = "#8b8a6a",
     "Tissue-specific" = "#a97d80"
     )) +
   facet_grid(~metric) +
@@ -455,14 +457,14 @@ prom <- bind_rows(
   ggside::scale_xsidey_discrete() +
   scale_y_continuous(name = "Density") +
   scale_color_manual(values = c(
-    "Ubiquitous_RETSI" = "#516c48",
-    "Ubiquitous_GETSI" = "#516c48",
+    "Ubiquitous_RETSI" = "#59583a",
+    "Ubiquitous_GETSI" = "#59583a",
     "Tissue-specific_RETSI" = "#926164",
     "Tissue-specific_GETSI" = "#926164"
   )) +
   scale_fill_manual(values = c(
-    "Ubiquitous_RETSI" = "#8da17f",
-    "Ubiquitous_GETSI" = "#8da17f",
+    "Ubiquitous_RETSI" = "#8b8a6a",
+    "Ubiquitous_GETSI" = "#8b8a6a",
     "Tissue-specific_RETSI" = "#bd9c9e",
     "Tissue-specific_GETSI" = "#bd9c9e"
   )) +
@@ -521,14 +523,14 @@ enh <- bind_rows(
   ggside::scale_xsidey_discrete() +
   scale_y_continuous(name = "Density") +
   scale_color_manual(values = c(
-    "Ubiquitous_RETSI" = "#516c48",
-    "Ubiquitous_GETSI" = "#516c48",
+    "Ubiquitous_RETSI" = "#59583a",
+    "Ubiquitous_GETSI" = "#59583a",
     "Tissue-specific_RETSI" = "#926164",
     "Tissue-specific_GETSI" = "#926164"
   )) +
   scale_fill_manual(values = c(
-    "Ubiquitous_RETSI" = "#8da17f",
-    "Ubiquitous_GETSI" = "#8da17f",
+    "Ubiquitous_RETSI" = "#8b8a6a",
+    "Ubiquitous_GETSI" = "#8b8a6a",
     "Tissue-specific_RETSI" = "#bd9c9e",
     "Tissue-specific_GETSI" = "#bd9c9e"
   )) +
@@ -561,39 +563,37 @@ Known ubiquitous sites have higher entropy -indicating widespread activity- whil
 
 ```{r entropy, message=FALSE, warning=FALSE, fig.show="hold", echo=FALSE, fig.cap="(ref:entropy)", fig.width=6, fig.height=4}
 
-# 3. ENTROPY ----
-## getsi H
+# =========================
+# 1. GETSI entropy (genes)
+# =========================
 entropy_genes <- bind_rows(
-  # Tissue-specific data
+  # Tissue-specific
   SPICEY_ANNOTATED_COACC$linked %>%
     data.frame() %>%
     dplyr::filter(gene_id %in% ct_markers$Gene) %>%
     mutate(type = "Tissue-specific"),
   
-  # Ubiquitous data
+  # Ubiquitous
   SPICEY_ANNOTATED_COACC$linked %>%
     data.frame() %>%
     dplyr::filter(gene_id %in% ubiquitous) %>%
-    mutate(type = "Ubiquitous")) %>%
+    mutate(type = "Ubiquitous")
+) %>%
   mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
          RETSI = as.numeric(RETSI),
          GETSI = as.numeric(GETSI)) %>%
-  filter(
-    !is.na(RETSI),
-    !is.na(GETSI),
-    !is.na(type)) %>%
+  filter(!is.na(RETSI), !is.na(GETSI), !is.na(type)) %>%
   {rownames(.) <- NULL; .} %>%
-  filter(!is.na(GETSI),
-         !is.na(RETSI)) %>%
   pivot_longer(cols = c(GETSI_entropy),
                names_to = "spicey_measure",
                values_to = "value") %>%
   mutate(spicey_measure = gsub("_entropy", "", spicey_measure)) %>%
   ggplot(aes(x = type,
              y = value,
-             fill = type)) +
+             fill = type,
+             color = type)) +        # <- outline by type
   geom_violin() +
-  geom_boxplot(alpha = 0.4) +  # Adjust outlier behavior if needed
+  geom_boxplot(alpha = 0.4) +
   theme_gray() +
   labs(x = "", y = expression(H[norm]~"GETSI")) +
   theme(
@@ -606,61 +606,60 @@ entropy_genes <- bind_rows(
     plot.title = element_text(size = 12)
   ) +
   scale_fill_manual(values = c(
-    "Ubiquitous" = "#647c5c",
-    "Tissue-specific" = "#a78083"
+    "Ubiquitous" = "#8b8a6a",
+    "Tissue-specific" = "#a97d80"
   )) +
-  # ylim(c(1,1.2))+
-  geom_signif(comparisons = list(
-    c("Tissue-specific", "Ubiquitous")),
-    y_position = c(1, 1.1),  # Adjust y position for annotations
-    map_signif_level = TRUE,  # Display significance level
-    textsize = 2.3,
-    vjust = 0.01,               # Moves text slightly above the line
-    tip_length = 0.02         # Negative value to flip arrows **upwards**
-  )
+  scale_color_manual(values = c(
+    "Ubiquitous" = "#59583a",
+    "Tissue-specific" = "#926164"
+  )) +
+  geom_signif(comparisons = list(c("Tissue-specific", "Ubiquitous")),
+              y_position = c(1, 1.1),
+              map_signif_level = TRUE,
+              textsize = 2.3,
+              vjust = 0.01,
+              tip_length = 0.02, 
+              color = "black")
 
 g_entropy <- cowplot::plot_grid(entropy_genes,
                                 labels = c("A"),
                                 label_size = 12)
 
-## retsi H
+
+# =========================
+# 2. RETSI entropy (promoter)
+# =========================
 entropy_prom <- bind_rows(
-  # Tissue-specific data
+  # Tissue-specific
   SPICEY_ANNOTATED_COACC$linked %>%
     data.frame() %>%
     dplyr::filter(gene_id %in% ct_markers$Gene) %>%
     mutate(type = "Tissue-specific"),
   
-  # Ubiquitous data
+  # Ubiquitous
   SPICEY_ANNOTATED_COACC$linked %>%
     data.frame() %>%
     dplyr::filter(gene_id %in% ubiquitous) %>%
-    mutate(type = "Ubiquitous")) %>%
+    mutate(type = "Ubiquitous")
+) %>%
   mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
          RETSI = as.numeric(RETSI),
          GETSI = as.numeric(GETSI)) %>%
-  filter(
-    !is.na(RETSI),
-    !is.na(GETSI),
-    !is.na(type)) %>%
+  filter(!is.na(RETSI), !is.na(GETSI), !is.na(type)) %>%
   {rownames(.) <- NULL; .} %>%
-  filter(!is.na(GETSI),
-         !is.na(RETSI)) %>%
   pivot_longer(cols = c(RETSI_entropy),
                names_to = "spicey_measure",
                values_to = "value") %>%
-  # Apply conditional TSS filters *only for RETSI*
-  filter(
-    spicey_measure != "RETSI" |
-      (type == "Tissue-specific" & TSS_gene %in% ct_markers$Gene & annotation == "Promoter" |
-         (type == "Ubiquitous" & TSS_gene %in% ubiquitous & annotation == "Promoter")
-      )) %>%
+  filter(spicey_measure != "RETSI" |
+           (type == "Tissue-specific" & TSS_gene %in% ct_markers$Gene & annotation == "Promoter" |
+              (type == "Ubiquitous" & TSS_gene %in% ubiquitous & annotation == "Promoter"))) %>%
   mutate(spicey_measure = gsub("_entropy", "", spicey_measure)) %>%
   ggplot(aes(x = type,
              y = value,
-             fill = type)) +
+             fill = type,
+             color = type)) +
   geom_violin() +
-  geom_boxplot(alpha = 0.4) +  # Adjust outlier behavior if needed
+  geom_boxplot(alpha = 0.4) +
   theme_gray() +
   labs(x = "", y = expression(H[norm]~"RETSI")) +
   theme(
@@ -673,57 +672,55 @@ entropy_prom <- bind_rows(
     plot.title = element_text(size = 12)
   ) +
   scale_fill_manual(values = c(
-    "Ubiquitous" = "#5B7A45",
+    "Ubiquitous" = "#8b8a6a",
     "Tissue-specific" = "#a97d80"
   )) +
-  # ylim(c(1,1.2))+
-  geom_signif(comparisons = list(
-    c("Tissue-specific", "Ubiquitous")),
-    y_position = c(1, 1.1),  # Adjust y position for annotations
-    map_signif_level = TRUE,  # Display significance level
-    textsize = 2.3,
-    vjust = 0.01,               # Moves text slightly above the line
-    tip_length = 0.02         # Negative value to flip arrows **upwards**
-  ) +
-  # facet_grid(~spicey_measure) +
+  scale_color_manual(values = c(
+    "Ubiquitous" = "#59583a",
+    "Tissue-specific" = "#926164"
+  )) +
+  geom_signif(comparisons = list(c("Tissue-specific", "Ubiquitous")),
+              y_position = c(1, 1.1),
+              map_signif_level = TRUE,
+              textsize = 2.3,
+              vjust = 0.01,
+              tip_length = 0.02, 
+              color = "black") +
   ggtitle("Promoter")
 
 
+# =========================
+# 3. RETSI entropy (distal)
+# =========================
 entropy_distal <- bind_rows(
-  # Tissue-specific data
+  # Tissue-specific
   SPICEY_ANNOTATED_COACC$linked %>%
     data.frame() %>%
     dplyr::filter(gene_id %in% ct_markers$Gene) %>%
     mutate(type = "Tissue-specific"),
   
-  # Ubiquitous data
+  # Ubiquitous
   SPICEY_ANNOTATED_COACC$linked %>%
     data.frame() %>%
     dplyr::filter(gene_id %in% ubiquitous) %>%
-    mutate(type = "Ubiquitous")) %>%
+    mutate(type = "Ubiquitous")
+) %>%
   mutate(type = factor(type, levels = c("Ubiquitous", "Tissue-specific")),
          RETSI = as.numeric(RETSI),
          GETSI = as.numeric(GETSI)) %>%
-  filter(
-    !is.na(RETSI),
-    !is.na(GETSI),
-    !is.na(type)) %>%
+  filter(!is.na(RETSI), !is.na(GETSI), !is.na(type)) %>%
   {rownames(.) <- NULL; .} %>%
-  filter(!is.na(GETSI),
-         !is.na(RETSI)) %>%
   pivot_longer(cols = c(RETSI_entropy),
                names_to = "spicey_measure",
                values_to = "value") %>%
   mutate(spicey_measure = gsub("_entropy", "", spicey_measure)) %>%
-  # Apply conditional TSS filters *only for RETSI*
-  filter(
-    spicey_measure != "RETSI" |
-      (annotation == "Distal")) %>%
+  filter(spicey_measure != "RETSI" | (annotation == "Distal")) %>%
   ggplot(aes(x = type,
              y = value,
-             fill = type)) +
+             fill = type,
+             color = type)) +
   geom_violin() +
-  geom_boxplot(alpha = 0.4) +  # Adjust outlier behavior if needed
+  geom_boxplot(alpha = 0.4) +
   theme_gray() +
   labs(x = "", y = "") +
   theme(
@@ -736,22 +733,26 @@ entropy_distal <- bind_rows(
     plot.title = element_text(size = 12)
   ) +
   scale_fill_manual(values = c(
-    "Ubiquitous" = "#5B7A45",
+    "Ubiquitous" = "#8b8a6a",
     "Tissue-specific" = "#a97d80"
   )) +
-  # ylim(c(1,1.2))+
-  geom_signif(comparisons = list(
-    c("Tissue-specific", "Ubiquitous")),
-    y_position = c(1, 1.1),  # Adjust y position for annotations
-    map_signif_level = TRUE,  # Display significance level
-    textsize = 2.3,
-    vjust = 0.01,               # Moves text slightly above the line
-    tip_length = 0.02         # Negative value to flip arrows **upwards**
-  ) +
-  # facet_grid(~spicey_measure) +
+  scale_color_manual(values = c(
+    "Ubiquitous" = "#59583a",
+    "Tissue-specific" = "#926164"
+  )) +
+  geom_signif(comparisons = list(c("Tissue-specific", "Ubiquitous")),
+              y_position = c(1, 1.1),
+              map_signif_level = TRUE,
+              textsize = 2.3,
+              vjust = 0.01,
+              tip_length = 0.02, 
+              color = "black") +
   ggtitle("Distal")
 
 
+# =========================
+# 4. Combine panels
+# =========================
 r_entropy <- cowplot::plot_grid(entropy_prom, entropy_distal,
                                 labels = c("B"),
                                 label_size = 12)
@@ -766,34 +767,58 @@ entropy_final <- cowplot::plot_grid(
 
 entropy_final
 
+
 ```
 
 (ref:entropy) Entropy metrics reveal lower values for tissue-specific features, confirming stronger cell-type specificity.
 
-<br>
+::: {style="height:60px;"}
+:::
 
 ## SPICEY uncovers both known and novel markers in human pancreatic islets
 
 SPICEY identified well-known markers in endocrine cells (*INS, IGF2, SST, IRX1/IRX2*) [@hauge-evans_somatostatin_2009] as well as less common ones like *ADCYAP1, SIX2*, and *LRFN5* [@yamamoto_overexpression_2003];[@bevacqua_six2_2021]*;* [@elgamal_integrated_2023]*.*
 
-It recovered established markers such as *REG1A/B, PI3, KRT* family, and *COL6A1*, for non-endocrine cells while also capturing novel potential candidates like *GIMAP* genes in endothelial cells (**Figure** \@ref(fig:main2)).
+It recovered established markers such as *REG1A/B, PI3, KRT* family, and *COL6A1* [@reichert2011pancreatic];[@dorrell2008isolation];[@dorrell2011a];[@dorrell2011b];[@mathison2010pancreatic];[@dabbs2013diagnostic], for non-endocrine cells while also capturing novel potential candidates like *GIMAP* genes in endothelial cells (**Figure** \@ref(fig:main2)).
 
-```{r main2, message=FALSE, warning=FALSE, fig.show="hold", echo=FALSE, fig.cap="(ref:main2)"}
+```{r main2, message=FALSE, warning=FALSE, fig.show="hold", echo=FALSE, fig.cap="(ref:main2)", fig.align='center', fig.width=3, fig.height=3.2}
 
-t <- SPICEY::spicey_heatmap(df = SPICEY_ANNOTATED_COACC$linked, 
-                            spicey_measure = c("SPICEY"), 
-                            combined_zscore = FALSE, 
+# t <- SPICEY::spicey_heatmap(df = SPICEY_ANNOTATED_COACC$linked,
+#                             spicey_measure = c("SPICEY"),
+#                             combined_zscore = FALSE,
+#                             top_n = 5)
+# 
+# cowplot::ggdraw() +
+#   cowplot::draw_plot(t, x = 0, y = 0, width = 1, height = 1) +
+#   theme(plot.margin = unit(c(-0.5, 0, -0.5, 0), "cm"))
+# 
+
+r <- SPICEY::spicey_heatmap(df = SPICEY_ANNOTATED_COACC$linked,
+                            spicey_measure = c("RETSI"),
+                            combined_zscore = FALSE,
                             top_n = 5)
+r <- r + ggtitle("RETSI")
+# r <- cowplot::ggdraw() +
+#   cowplot::draw_plot(r, x = 0, y = 0, width = 1, height = 1) +
+#   theme(plot.margin = unit(c(-0.5, 0, -0.5, 0), "cm")) +
+#   ggtitle("RETSI")
 
-cowplot::ggdraw() +
-  cowplot::draw_plot(t, x = 0, y = 0, width = 1, height = 1) +
-  theme(plot.margin = unit(c(-0.5, 0, -0.5, 0), "cm"))
+g <- SPICEY::spicey_heatmap(df = SPICEY_ANNOTATED_COACC$GETSI,
+                            spicey_measure = c("GETSI"),
+                            combined_zscore = FALSE,
+                            top_n = 5)
+# g <- cowplot::ggdraw() +
+#   cowplot::draw_plot(g, x = 0, y = 0, width = 1, height = 1) +
+#   theme(plot.margin = unit(c(-0.5, 0, -0.5, 0), "cm")) 
+g <- g + ggtitle(NULL)
+g <- g + ggtitle("GETSI")
+
+r
+g
 
 ```
 
 (ref:main2) *Top SPICEY cell-type-specific features.* The heatmap displays the top 5 genes for each cell type based on RETSI and GETSI z-scores. Rows represent genes and columns represent cell types. Darker colors indicate higher specificity.
-
-<div style="height:30px;"></div>
 
 # Conclusions
 
@@ -802,7 +827,5 @@ cowplot::ggdraw() +
 -   Identifies both, known and novel markers across well-defined and less-studied cell types, distinguishing tissue-specific from broadly active features.
 
 -   Annotates regulatory elements to target genes helping elucidate tissue-specific regulatory networks.
-
-<div style="height:30px;"></div>
 
 # References

@@ -77,8 +77,8 @@ border-radius: 2mm;
 code {
 font-size: 25pt;
 font-family: monospace;
-background-color: #3a4d3424;
-color: #684548;
+background-color: #3a3a1e24;
+color: #926164;
 padding: 1.2mm;
 line-height: 1;
 border-radius: 2mm;
@@ -90,7 +90,7 @@ font-style: italic;
 }
 
 tbody tr:nth-child(odd) {
-    background-color: #3a4d3420;
+    background-color: #3a3a1e20;
 }
 .table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
   border-spacing: 0;
@@ -115,7 +115,7 @@ font-style: italic;
 padding-top: 0;
 }
 .references {
-font-size: 35pt;
+font-size: 30pt;
 line-height: 90%;
 }
 /* Create three unequal columns that floats next to each other */
@@ -151,12 +151,12 @@ padding-top: 1em;
 padding-bottom: 1em;
 }
 span.citation {
-  color: #3a4d34;
+  color: #3a3a1e;
   font-weight: bold;
 }
 a {
 text-decoration: none;
-color: #3a4d34;
+color: #3a3a1e;
 }
 #title {
 font-size: 75pt;
@@ -168,7 +168,7 @@ font-weight: normal;
 background: 0;
 }
 #author {
-color: #684548;
+color: #926164;
 margin: 0;
 line-height: 85%;
 font-size: 65pt;
@@ -181,7 +181,7 @@ font-size: 35pt;
 margin: 0;
 }
 sup {
-color: #926164;
+color: #59583a;
 }
 .affiliation sup {
 font-size: 20px;
@@ -193,7 +193,7 @@ text-align: left;
 font-size: 30px;
 }
 .author_extra {
-color: #3a4d34;
+color: #3a3a1e;
 margin: 0;
 line-height: 85%;
 font-size: 45pt;
@@ -212,9 +212,9 @@ font-weight: bold;
       to left,
       #ffffff 1%,
       #ffffff 20%,
-      #68454875 33%,
-      #684548 50%,
-      #68454875 66%,
+      #92616475 33%,
+      #926164 50%,
+      #92616475 66%,
       #ffffff 80%,
       #ffffff 99%
     )
@@ -241,10 +241,10 @@ text-align: left;
 width: 37.40in;
 height: calc(73.23in * 0.15);
 position: absolute;
-background-color: #684548;
+background-color: #926164;
 color: #FFFFFF100;
 font-family: Lato;
-background-image: linear-gradient(#684548 50%,#3a4d34);
+background-image: linear-gradient(#926164 50%,#3a3a1e);
 }
 .main strong {
 color: #FFFFFF;
@@ -313,8 +313,8 @@ width: 37.40in;
 height: calc(73.23in * 4.0e-2);
 margin-top: calc(73.23in * (1 - 4.0e-2));
 position: absolute;
-background-color: #684548;
-background-image: linear-gradient(#3a4d34 10%, #684548);
+background-color: #926164;
+background-image: linear-gradient(#3a3a1e 10%, #926164);
 }
 .section {
   padding-left: 10mm;
@@ -417,10 +417,10 @@ span > #tab:mytable {
 
   /* Headers */
   h1 {
-    font-size: 67pt;
+    font-size: 62pt;
   }
   h2,h3,h4,h5,h6 {
-    font-size: 55pt;
+    font-size: 50pt;
   }
 
   /* Change space between figure and captions */
@@ -432,27 +432,27 @@ span > #tab:mytable {
     text-align: center; /* optional */
   }
 </style>
-<div style="height:60px;">
+<div style="height:5px;">
 
 </div>
 <div id="background" class="section level1">
 <h1>Background</h1>
 <p>Single-cell RNA and ATAC sequencing allow high-resolution profiling of gene expression and chromatin accessibility, revealing cell-type-specific regulatory programs. Yet, tools to quantify specificity across multiple cell types are still limited <span class="citation">(Lim <em>et al.</em>, 2024)</span>.</p>
 <p><strong>SPICEY</strong> (<strong>SP</strong>ecificity <strong>I</strong>ndex for <strong>C</strong>oding and <strong>E</strong>pigenetic activit<strong>Y</strong>) is the first R package to quantify cell-type specificity from single-cell multi-omic data, offering an intuitive pipeline for analyzing and visualizing transcriptomic and epigenomic specificity.</p>
-<div style="height:30px;">
+<div style="height:1px;">
 
 </div>
 </div>
 <div id="methods" class="section level1">
 <h1>Methods</h1>
 <div class="figure" style="text-align: center"><span style="display:block;" id="fig:workflow"></span>
-<img src="figs/SPICEY_wf.png" alt="SPICEY workflow. Differential single-cell RNA/ATAC data and region–gene annotations are used to compute specificity and entropy metrics, enabling the construction of tissue-specific regulatory networks." width="100%" height="100%" />
+<img src="figs/SPICEY_WF_FINAL.png" alt="SPICEY workflow. Differential single-cell RNA/ATAC data and region–gene annotations are used to compute specificity and entropy metrics, enabling the construction of tissue-specific regulatory networks." width="100%" height="100%" />
 <p class="caption">
 Figure 1: <em>SPICEY workflow</em>. Differential single-cell RNA/ATAC data and region–gene annotations are used to compute specificity and entropy metrics, enabling the construction of tissue-specific regulatory networks.
 </p>
 </div>
 
-<div style="height:20px;">
+<div style="height:5px;">
 
 </div>
 <div id="cell-type-specificity-indices" class="section level2">
@@ -490,16 +490,13 @@ H_{norm} = 1 - e^{H}
 <li><span class="math inline">\(H_{norm}\)</span> = normalized shannon entropy [0,1].</li>
 </ul>
 <p>Feature activity or expression is normalized across cell types to form a probability distribution, where low entropy indicates specificity to a few cell types, and high entropy reflects broad, uniform activity.</p>
-<div style="height:20px;">
+<div style="height:5px;">
 
 </div>
 </div>
 <div id="region-to-gene-annotation" class="section level2">
 <h2>Region-to-gene annotation</h2>
 <p>To help construct tissue-specific gene-regulatory networks, SPICEY optionally annotates regulatory regions to their putative target genes using (1) <strong>nearest-gene</strong> (based on proximity to the closest TSS), or (2) <strong>co-accessibility</strong> (using correlated chromatin accessibility).</p>
-<div style="height:30px;">
-
-</div>
 </div>
 </div>
 <div id="results" class="section level1">
@@ -530,22 +527,21 @@ Figure 4: Entropy metrics reveal lower values for tissue-specific features, conf
 </p>
 </div>
 
-<p><br></p>
+<div style="height:60px;">
+
+</div>
 </div>
 <div id="spicey-uncovers-both-known-and-novel-markers-in-human-pancreatic-islets" class="section level2">
 <h2>SPICEY uncovers both known and novel markers in human pancreatic islets</h2>
 <p>SPICEY identified well-known markers in endocrine cells (<em>INS, IGF2, SST, IRX1/IRX2</em>) <span class="citation">(Hauge-Evans <em>et al.</em>, 2009)</span> as well as less common ones like <em>ADCYAP1, SIX2</em>, and <em>LRFN5</em> <span class="citation">(Yamamoto <em>et al.</em>, 2003)</span>;<span class="citation">(Bevacqua <em>et al.</em>, 2021)</span><em>;</em> <span class="citation">(Elgamal <em>et al.</em>, 2023)</span><em>.</em></p>
-<p>It recovered established markers such as <em>REG1A/B, PI3, KRT</em> family, and <em>COL6A1</em>, for non-endocrine cells while also capturing novel potential candidates like <em>GIMAP</em> genes in endothelial cells (<strong>Figure</strong> <a href="#fig:main2">5</a>).</p>
+<p>It recovered established markers such as <em>REG1A/B, PI3, KRT</em> family, and <em>COL6A1</em> <span class="citation">(Reichert and Rustgi, 2011)</span>;<span class="citation">(Dorrell <em>et al.</em>, 2008)</span>;<span class="citation">(Dorrell, Grompe, <em>et al.</em>, 2011)</span>;<span class="citation">(Dorrell, Schug, <em>et al.</em>, 2011)</span>;<span class="citation">(Mathison <em>et al.</em>, 2010)</span>;<span class="citation">(Dabbs, 2013)</span>, for non-endocrine cells while also capturing novel potential candidates like <em>GIMAP</em> genes in endothelial cells (<strong>Figure</strong> <a href="#fig:main2">5</a>).</p>
 <div class="figure" style="text-align: center"><span style="display:block;" id="fig:main2"></span>
-<img src="POSTER_EUROBIOC_20250805_files/figure-html/main2-1.png" alt="Top SPICEY cell-type-specific features. The heatmap displays the top 5 genes for each cell type based on RETSI and GETSI z-scores. Rows represent genes and columns represent cell types. Darker colors indicate higher specificity." width="100%" height="100%" />
+<img src="POSTER_EUROBIOC_20250805_files/figure-html/main2-1.png" alt="Top SPICEY cell-type-specific features. The heatmap displays the top 5 genes for each cell type based on RETSI and GETSI z-scores. Rows represent genes and columns represent cell types. Darker colors indicate higher specificity." width="100%" height="100%" /><img src="POSTER_EUROBIOC_20250805_files/figure-html/main2-2.png" alt="Top SPICEY cell-type-specific features. The heatmap displays the top 5 genes for each cell type based on RETSI and GETSI z-scores. Rows represent genes and columns represent cell types. Darker colors indicate higher specificity." width="100%" height="100%" />
 <p class="caption">
 Figure 5: <em>Top SPICEY cell-type-specific features.</em> The heatmap displays the top 5 genes for each cell type based on RETSI and GETSI z-scores. Rows represent genes and columns represent cell types. Darker colors indicate higher specificity.
 </p>
 </div>
 
-<div style="height:30px;">
-
-</div>
 </div>
 </div>
 <div id="conclusions" class="section level1">
@@ -555,9 +551,6 @@ Figure 5: <em>Top SPICEY cell-type-specific features.</em> The heatmap displays 
 <li><p>Identifies both, known and novel markers across well-defined and less-studied cell types, distinguishing tissue-specific from broadly active features.</p></li>
 <li><p>Annotates regulatory elements to target genes helping elucidate tissue-specific regulatory networks.</p></li>
 </ul>
-<div style="height:30px;">
-
-</div>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
@@ -567,6 +560,18 @@ Figure 5: <em>Top SPICEY cell-type-specific features.</em> The heatmap displays 
 </div>
 <div id="ref-bevacqua_six2_2021" class="csl-entry">
 • Bevacqua,R.J. <em>et al.</em> (2021) <a href="https://doi.org/10.1101/gad.342378.120"><span>SIX2</span> and <span>SIX3</span> coordinately regulate functional maturity and fate of human pancreatic β cells.</a> <em>Genes &amp; development</em>, <strong>35</strong>, 234–249.
+</div>
+<div id="ref-dabbs2013diagnostic" class="csl-entry">
+• Dabbs,D.J. (2013) Diagnostic immunohistochemistry.
+</div>
+<div id="ref-dorrell2008isolation" class="csl-entry">
+• Dorrell,C. <em>et al.</em> (2008) <a href="https://doi.org/10.1016/j.scr.2008.07.001">Isolation of major pancreatic cell types and long-term culture-initiating cells using novel human surface markers</a>. <em>Stem Cell Research</em>, <strong>1</strong>, 183–194.
+</div>
+<div id="ref-dorrell2011a" class="csl-entry">
+• Dorrell,C., Grompe,M.T., <em>et al.</em> (2011) <a href="https://doi.org/10.1016/j.mce.2011.04.008">Isolation of mouse pancreatic <span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span>, duct and acinar populations with cell surface markers</a>. <em>Molecular and Cellular Endocrinology</em>, <strong>339</strong>, 144–150.
+</div>
+<div id="ref-dorrell2011b" class="csl-entry">
+• Dorrell,C., Schug,J., <em>et al.</em> (2011) <a href="https://doi.org/10.1007/s00125-011-2252-1">Transcriptomes of the major human pancreatic cell types</a>. <em>Diabetologia</em>, <strong>54</strong>, 2832–2844.
 </div>
 <div id="ref-elgamal_integrated_2023" class="csl-entry">
 • Elgamal,R.M. <em>et al.</em> (2023) <a href="https://doi.org/10.2337/db23-0130">An <span>Integrated</span> <span>Map</span> of <span>Cell</span> <span>Type</span>-<span>Specific</span> <span>Gene</span> <span>Expression</span> in <span>Pancreatic</span> <span>Islets</span>.</a> <em>Diabetes</em>, <strong>72</strong>, 1719–1728.
@@ -583,6 +588,12 @@ Figure 5: <em>Top SPICEY cell-type-specific features.</em> The heatmap displays 
 <div id="ref-lim_advances_2024" class="csl-entry">
 • Lim,J. <em>et al.</em> (2024) <a href="https://doi.org/10.1038/s12276-024-01186-2">Advances in single-cell omics and multiomics for high-resolution molecular profiling</a>. <em>Experimental &amp; Molecular Medicine</em>, <strong>56</strong>, 515–526.
 </div>
+<div id="ref-mathison2010pancreatic" class="csl-entry">
+• Mathison,A. <em>et al.</em> (2010) <a href="https://doi.org/10.1159/000313706">Pancreatic stellate cell models for transcriptional studies of desmoplasia-associated genes</a>. <em>Pancreatology</em>, <strong>10</strong>, 505–516.
+</div>
+<div id="ref-reichert2011pancreatic" class="csl-entry">
+• Reichert,M. and Rustgi,A.K. (2011) <a href="https://doi.org/10.1172/JCI57131">Pancreatic ductal cells in development, regeneration, and neoplasia</a>. <em>Journal of Clinical Investigation</em>, <strong>121</strong>, 4572–4578.
+</div>
 <div id="ref-yamamoto_overexpression_2003" class="csl-entry">
 • Yamamoto,K. <em>et al.</em> (2003) <a href="https://doi.org/10.2337/diabetes.52.5.1155">Overexpression of <span>PACAP</span> in transgenic mouse pancreatic beta-cells enhances insulin secretion and ameliorates streptozotocin-induced diabetes.</a> <em>Diabetes</em>, <strong>52</strong>, 1155–1162.
 </div>
@@ -591,7 +602,7 @@ Figure 5: <em>Top SPICEY cell-type-specific features.</em> The heatmap displays 
 
 </div>
 <div class="main">
-<p><img src="figs/main_spicey_white.png" style="width:90.0%" /></p>
+<p><img src="figs/main_spicey_white.png" style="width:95.0%" /></p>
 </div>
 <div class="main_bottom">
 <img id="main-img-left" src=figs/UPF.png>
